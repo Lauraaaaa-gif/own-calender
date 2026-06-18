@@ -514,6 +514,17 @@ textarea:focus-visible {
   white-space: nowrap;
 }
 
+.preview-line.event-tone-lavender,
+.preview-line.event-tone-blue,
+.preview-line.event-tone-mint,
+.preview-line.event-tone-amber,
+.preview-line.event-tone-rose {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.42);
+  box-shadow: 0 5px 12px rgba(21, 24, 22, 0.08);
+  font-weight: 800;
+}
+
 .detail-title-block {
   min-width: 0;
 }
@@ -639,6 +650,65 @@ textarea::placeholder {
   box-shadow: none;
 }
 
+.color-field {
+  display: grid;
+  gap: 9px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+}
+
+.color-field legend {
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.color-options {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.color-option {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 8px;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.color-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.color-option:has(input:checked) {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(70, 88, 168, 0.42);
+  box-shadow: 0 8px 18px rgba(70, 88, 168, 0.12);
+}
+
+.color-swatch {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+}
+
 .event-list {
   display: grid;
   gap: 12px;
@@ -697,6 +767,26 @@ textarea::placeholder {
 
 .event-color {
   background: linear-gradient(180deg, #91c4ff, #a78de8);
+}
+
+.event-tone-lavender {
+  background: linear-gradient(180deg, #9ab6ff, #7868d9);
+}
+
+.event-tone-blue {
+  background: linear-gradient(180deg, #73c7ff, #2f80ed);
+}
+
+.event-tone-mint {
+  background: linear-gradient(180deg, #72d8bd, #2f9f78);
+}
+
+.event-tone-amber {
+  background: linear-gradient(180deg, #ffd166, #e29b19);
+}
+
+.event-tone-rose {
+  background: linear-gradient(180deg, #ff9fba, #d84f7a);
 }
 
 .event-content {
@@ -885,6 +975,10 @@ textarea::placeholder {
     flex-direction: column;
   }
 
+  .color-options {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .toast {
     right: 12px;
     bottom: 12px;
@@ -979,6 +1073,36 @@ textarea::placeholder {
               <input id="eventAllDay" type="checkbox">
               <span>整天活動</span>
             </label>
+            <fieldset class="color-field">
+              <legend>標籤顏色</legend>
+              <div class="color-options" aria-label="標籤顏色">
+                <label class="color-option">
+                  <input type="radio" name="eventColor" value="lavender" checked>
+                  <span class="color-swatch event-tone-lavender" aria-hidden="true"></span>
+                  <span>紫</span>
+                </label>
+                <label class="color-option">
+                  <input type="radio" name="eventColor" value="blue">
+                  <span class="color-swatch event-tone-blue" aria-hidden="true"></span>
+                  <span>藍</span>
+                </label>
+                <label class="color-option">
+                  <input type="radio" name="eventColor" value="mint">
+                  <span class="color-swatch event-tone-mint" aria-hidden="true"></span>
+                  <span>綠</span>
+                </label>
+                <label class="color-option">
+                  <input type="radio" name="eventColor" value="amber">
+                  <span class="color-swatch event-tone-amber" aria-hidden="true"></span>
+                  <span>黃</span>
+                </label>
+                <label class="color-option">
+                  <input type="radio" name="eventColor" value="rose">
+                  <span class="color-swatch event-tone-rose" aria-hidden="true"></span>
+                  <span>粉</span>
+                </label>
+              </div>
+            </fieldset>
             <label>
               詳細內容
               <textarea id="eventNotes" rows="5" placeholder="地點、備註、要準備的東西..."></textarea>
@@ -1052,6 +1176,7 @@ const eventStartTime = document.querySelector("#eventStartTime");
 const eventEndTime = document.querySelector("#eventEndTime");
 const eventAllDay = document.querySelector("#eventAllDay");
 const eventNotes = document.querySelector("#eventNotes");
+const eventColorInputs = [...document.querySelectorAll('input[name="eventColor"]')];
 const formTitle = document.querySelector("#formTitle");
 const formDateText = document.querySelector("#formDateText");
 const saveButton = document.querySelector("#saveButton");
@@ -1069,6 +1194,8 @@ const app = firebaseReady ? firebase.initializeApp(firebaseConfig) : null;
 const db = firebaseReady ? firebase.firestore(app) : null;
 const auth = firebaseReady ? firebase.auth(app) : null;
 const provider = firebaseReady ? new firebase.auth.GoogleAuthProvider() : null;
+const DEFAULT_EVENT_COLOR = "lavender";
+const EVENT_COLOR_VALUES = ["lavender", "blue", "mint", "amber", "rose"];
 
 const today = new Date();
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -1297,7 +1424,7 @@ function renderCalendar() {
     const preview = button.querySelector(".day-preview");
     dayEvents.slice(0, 3).forEach((event) => {
       const line = document.createElement("span");
-      line.className = "preview-line";
+      line.className = `preview-line ${getEventColorClass(event)}`;
       line.textContent = event.title;
       line.title = `${formatEventTime(event)} ${event.title}`;
       preview.append(line);
@@ -1340,6 +1467,7 @@ function renderDetails() {
 
   dayEvents.forEach((event) => {
     const node = eventTemplate.content.firstElementChild.cloneNode(true);
+    node.querySelector(".event-color").classList.add(getEventColorClass(event));
     node.querySelector(".event-meta").textContent = formatEventTime(event);
     node.querySelector("h4").textContent = event.title;
     node.querySelector("p").textContent = event.notes || "沒有填寫詳細內容。";
@@ -1373,6 +1501,7 @@ async function saveEvent(event) {
     endTime: eventAllDay.checked ? "" : eventEndTime.value,
     allDay: eventAllDay.checked,
     notes: eventNotes.value.trim(),
+    color: getSelectedEventColor(),
     updatedAt: new Date().toISOString(),
   };
 
@@ -1397,6 +1526,7 @@ function editEvent(id) {
   eventEndTime.value = event.endTime || "";
   eventAllDay.checked = Boolean(event.allDay);
   eventNotes.value = event.notes;
+  setSelectedEventColor(event.color);
   syncAllDayFields();
   showFormView();
   formTitle.textContent = "編輯活動";
@@ -1444,6 +1574,7 @@ function resetForm() {
   editingId.value = "";
   eventForm.reset();
   eventAllDay.checked = false;
+  setSelectedEventColor(DEFAULT_EVENT_COLOR);
   syncAllDayFields();
   formTitle.textContent = "新增活動";
   saveButton.textContent = "儲存活動";
@@ -1512,6 +1643,26 @@ function parseTimeText(value) {
   const minute = Number(padded.slice(2, 4));
   if (hour > 23 || minute > 59) return "";
   return `${pad(hour)}:${pad(minute)}`;
+}
+
+function normalizeEventColor(value) {
+  return EVENT_COLOR_VALUES.includes(value) ? value : DEFAULT_EVENT_COLOR;
+}
+
+function getSelectedEventColor() {
+  const selected = eventColorInputs.find((input) => input.checked);
+  return normalizeEventColor(selected?.value);
+}
+
+function setSelectedEventColor(value) {
+  const color = normalizeEventColor(value);
+  eventColorInputs.forEach((input) => {
+    input.checked = input.value === color;
+  });
+}
+
+function getEventColorClass(event) {
+  return `event-tone-${normalizeEventColor(event?.color)}`;
 }
 
 function handleShortcuts(event) {
