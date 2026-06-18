@@ -76,17 +76,19 @@ button {
 
 .app-shell {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 410px;
-  gap: 24px;
+  display: block;
   width: min(1500px, 100%);
   min-height: 100vh;
   margin: 0 auto;
   padding: 28px;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 .calendar-panel,
-.detail-panel {
+.detail-sheet {
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.76);
@@ -97,7 +99,7 @@ button {
 }
 
 .calendar-panel::before,
-.detail-panel::before {
+.detail-sheet::before {
   position: absolute;
   inset: 0;
   pointer-events: none;
@@ -115,15 +117,56 @@ button {
 }
 
 .detail-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 15;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  background: rgba(21, 24, 22, 0.38);
+  backdrop-filter: blur(10px);
+}
+
+.detail-panel.is-open {
+  display: flex;
+}
+
+.detail-sheet {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  width: min(560px, 100%);
+  max-height: min(880px, calc(100vh - 44px));
   min-width: 0;
   padding: 24px;
+  overflow-y: auto;
+}
+
+.keyboard-toggle {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  width: 44px;
+  min-height: 44px;
+  margin-top: -44px;
+  place-items: center;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  font-size: 1.1rem;
+}
+
+.keyboard-toggle.is-active {
+  color: #fff;
+  background: linear-gradient(180deg, #2d7056, var(--accent-strong));
 }
 
 .calendar-panel > *,
-.detail-panel > * {
+.detail-sheet > * {
   position: relative;
 }
 
@@ -493,6 +536,12 @@ textarea:focus-visible {
   gap: 8px;
 }
 
+.close-button {
+  width: 38px;
+  min-height: 38px;
+  font-size: 1.25rem;
+}
+
 .count-pill {
   flex: 0 0 auto;
   padding: 8px 12px;
@@ -551,6 +600,12 @@ textarea {
   box-shadow: inset 0 1px 2px rgba(21, 24, 22, 0.04);
 }
 
+input:disabled {
+  color: var(--faint);
+  background: rgba(255, 255, 255, 0.46);
+  cursor: not-allowed;
+}
+
 input,
 select {
   height: 44px;
@@ -572,6 +627,22 @@ textarea::placeholder {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.check-row input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  box-shadow: none;
 }
 
 .event-list {
@@ -634,22 +705,6 @@ textarea::placeholder {
   background: var(--accent);
 }
 
-.event-card[data-category="工作"] .event-color {
-  background: var(--blue);
-}
-
-.event-card[data-category="學習"] .event-color {
-  background: var(--violet);
-}
-
-.event-card[data-category="重要"] .event-color {
-  background: var(--wine);
-}
-
-.event-card[data-category="其他"] .event-color {
-  background: var(--amber);
-}
-
 .event-content {
   min-width: 0;
   padding: 14px;
@@ -680,11 +735,7 @@ textarea::placeholder {
 
 @media (max-width: 980px) {
   .app-shell {
-    grid-template-columns: 1fr;
-  }
-
-  .detail-panel {
-    order: -1;
+    width: 100%;
   }
 }
 
@@ -694,8 +745,20 @@ textarea::placeholder {
   }
 
   .calendar-panel,
-  .detail-panel {
+  .detail-sheet {
     padding: 15px;
+  }
+
+  .detail-panel {
+    align-items: flex-end;
+    padding: 8px;
+  }
+
+  .detail-sheet {
+    width: 100%;
+    max-height: 92vh;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
   }
 
   .topbar,
@@ -763,6 +826,12 @@ textarea::placeholder {
     right: 12px;
     bottom: 12px;
   }
+
+  .keyboard-toggle {
+    position: sticky;
+    bottom: 8px;
+    margin-top: -36px;
+  }
 }
 
   </style>
@@ -808,61 +877,65 @@ textarea::placeholder {
       <div class="calendar-grid" id="calendarGrid"></div>
     </section>
 
-    <aside class="detail-panel" aria-label="日期活動詳細頁">
-      <header class="detail-header">
-        <div class="detail-title-block">
-          <p class="eyebrow">Selected Date</p>
-          <h2 id="selectedDateLabel"></h2>
-        </div>
-        <div class="detail-actions">
-          <button class="secondary-button compact" type="button" id="focusEventButton">新增</button>
-          <span class="count-pill" id="selectedCount">0 筆</span>
-        </div>
-      </header>
+    <aside class="detail-panel" id="detailPanel" aria-label="日期活動詳細頁" aria-hidden="true">
+      <div class="detail-sheet" role="dialog" aria-modal="true" aria-labelledby="selectedDateLabel">
+        <header class="detail-header">
+          <div class="detail-title-block">
+            <p class="eyebrow">Selected Date</p>
+            <h2 id="selectedDateLabel"></h2>
+          </div>
+          <div class="detail-actions">
+            <button class="secondary-button compact" type="button" id="focusEventButton">新增</button>
+            <span class="count-pill" id="selectedCount">0 筆</span>
+            <button class="icon-button close-button" type="button" id="closeDetailButton" aria-label="關閉詳細頁" title="關閉">×</button>
+          </div>
+        </header>
 
-      <section class="form-panel" aria-label="新增或編輯活動">
-        <h3 id="formTitle">新增活動</h3>
-        <p class="form-date" id="formDateText"></p>
-        <form id="eventForm">
-          <input type="hidden" id="editingId">
-          <label>
-            活動名稱
-            <input id="eventTitle" type="text" maxlength="80" required placeholder="例如：看牙醫">
-          </label>
-          <div class="two-column">
+        <section class="form-panel" aria-label="新增或編輯活動">
+          <h3 id="formTitle">新增活動</h3>
+          <p class="form-date" id="formDateText"></p>
+          <form id="eventForm">
+            <input type="hidden" id="editingId">
             <label>
-              開始時間
-              <input id="eventTime" type="time">
+              活動名稱
+              <input id="eventTitle" type="text" maxlength="80" required placeholder="例如：看牙醫">
+            </label>
+            <div class="two-column">
+              <label>
+                開始時間
+                <input id="eventStartTime" type="time">
+              </label>
+              <label>
+                結束時間
+                <input id="eventEndTime" type="time">
+              </label>
+            </div>
+            <label class="check-row">
+              <input id="eventAllDay" type="checkbox">
+              <span>整天活動</span>
             </label>
             <label>
-              類型
-              <select id="eventCategory">
-                <option value="生活">生活</option>
-                <option value="工作">工作</option>
-                <option value="學習">學習</option>
-                <option value="重要">重要</option>
-                <option value="其他">其他</option>
-              </select>
+              詳細內容
+              <textarea id="eventNotes" rows="5" placeholder="地點、備註、要準備的東西..."></textarea>
             </label>
-          </div>
-          <label>
-            詳細內容
-            <textarea id="eventNotes" rows="5" placeholder="地點、備註、要準備的東西..."></textarea>
-          </label>
-          <div class="form-actions">
-            <button class="primary-button" type="submit" id="saveButton">儲存活動</button>
-            <button class="secondary-button" type="button" id="cancelEditButton" hidden>取消編輯</button>
-          </div>
-        </form>
-      </section>
+            <div class="form-actions">
+              <button class="primary-button" type="submit" id="saveButton">儲存活動</button>
+              <button class="secondary-button" type="button" id="cancelEditButton" hidden>取消編輯</button>
+            </div>
+          </form>
+        </section>
 
-      <section class="events-section" aria-label="當日活動">
-        <div class="section-title">
-          <h3>當日活動</h3>
-          <button class="secondary-button compact" type="button" id="exportButton">備份</button>
-        </div>
-        <div class="event-list" id="eventList"></div>
-      </section>
+        <section class="events-section" aria-label="當日活動">
+          <div class="section-title">
+            <h3>當日活動</h3>
+            <button class="secondary-button compact" type="button" id="exportButton">備份</button>
+          </div>
+          <div class="event-list" id="eventList"></div>
+        </section>
+        <button class="keyboard-toggle" type="button" id="keyboardToggle" aria-pressed="false" aria-label="切換鍵盤輸入時間" title="切換鍵盤輸入時間">
+          <span aria-hidden="true">⌨</span>
+        </button>
+      </div>
     </aside>
   </main>
 
@@ -888,6 +961,7 @@ const STORAGE_KEY = "personal-calendar-events-v1";
 const monthLabel = document.querySelector("#monthLabel");
 const monthSummary = document.querySelector("#monthSummary");
 const calendarGrid = document.querySelector("#calendarGrid");
+const detailPanel = document.querySelector("#detailPanel");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
 const selectedCount = document.querySelector("#selectedCount");
 const jumpMonth = document.querySelector("#jumpMonth");
@@ -895,14 +969,17 @@ const eventList = document.querySelector("#eventList");
 const eventForm = document.querySelector("#eventForm");
 const editingId = document.querySelector("#editingId");
 const eventTitle = document.querySelector("#eventTitle");
-const eventTime = document.querySelector("#eventTime");
-const eventCategory = document.querySelector("#eventCategory");
+const eventStartTime = document.querySelector("#eventStartTime");
+const eventEndTime = document.querySelector("#eventEndTime");
+const eventAllDay = document.querySelector("#eventAllDay");
 const eventNotes = document.querySelector("#eventNotes");
 const formTitle = document.querySelector("#formTitle");
 const formDateText = document.querySelector("#formDateText");
 const saveButton = document.querySelector("#saveButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
 const focusEventButton = document.querySelector("#focusEventButton");
+const closeDetailButton = document.querySelector("#closeDetailButton");
+const keyboardToggle = document.querySelector("#keyboardToggle");
 const toast = document.querySelector("#toast");
 const eventTemplate = document.querySelector("#eventTemplate");
 
@@ -910,6 +987,7 @@ const today = new Date();
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = toDateKey(today);
 let events = loadEvents();
+let keyboardTimeMode = false;
 
 document.querySelector("#prevMonth").addEventListener("click", () => changeMonth(-1));
 document.querySelector("#nextMonth").addEventListener("click", () => changeMonth(1));
@@ -917,6 +995,13 @@ document.querySelector("#todayButton").addEventListener("click", goToday);
 document.querySelector("#exportButton").addEventListener("click", exportBackup);
 jumpMonth.addEventListener("change", jumpToMonth);
 focusEventButton.addEventListener("click", focusNewEvent);
+closeDetailButton.addEventListener("click", closeDetail);
+detailPanel.addEventListener("click", handleOverlayClick);
+eventAllDay.addEventListener("change", syncAllDayFields);
+keyboardToggle.addEventListener("click", toggleKeyboardTimeMode);
+[eventStartTime, eventEndTime].forEach((input) => {
+  input.addEventListener("blur", normalizeTimeInput);
+});
 cancelEditButton.addEventListener("click", resetForm);
 eventForm.addEventListener("submit", saveEvent);
 document.addEventListener("keydown", handleShortcuts);
@@ -1005,7 +1090,7 @@ function renderCalendar() {
     dayEvents.slice(0, 3).forEach((event) => {
       const line = document.createElement("span");
       line.className = "preview-line";
-      line.textContent = `${event.time || "全天"} ${event.title}`;
+      line.textContent = `${formatEventTime(event)} ${event.title}`;
       preview.append(line);
     });
 
@@ -1016,7 +1101,7 @@ function renderCalendar() {
       }
       resetForm();
       render();
-      scrollDetailsOnSmallScreen();
+      openDetail();
     });
 
     calendarGrid.append(button);
@@ -1041,8 +1126,7 @@ function renderDetails() {
 
   dayEvents.forEach((event) => {
     const node = eventTemplate.content.firstElementChild.cloneNode(true);
-    node.dataset.category = event.category;
-    node.querySelector(".event-meta").textContent = `${event.time || "全天"} · ${event.category}`;
+    node.querySelector(".event-meta").textContent = formatEventTime(event);
     node.querySelector("h4").textContent = event.title;
     node.querySelector("p").textContent = event.notes || "沒有填寫詳細內容。";
     node.querySelector(".edit-event").addEventListener("click", () => editEvent(event.id));
@@ -1060,8 +1144,9 @@ function saveEvent(event) {
     id: editingId.value || createId(),
     date: selectedDate,
     title,
-    time: eventTime.value,
-    category: eventCategory.value,
+    startTime: eventAllDay.checked ? "" : eventStartTime.value,
+    endTime: eventAllDay.checked ? "" : eventEndTime.value,
+    allDay: eventAllDay.checked,
     notes: eventNotes.value.trim(),
     updatedAt: new Date().toISOString(),
   };
@@ -1084,9 +1169,11 @@ function editEvent(id) {
   if (!event) return;
   editingId.value = event.id;
   eventTitle.value = event.title;
-  eventTime.value = event.time;
-  eventCategory.value = event.category;
+  eventStartTime.value = event.startTime || event.time || "";
+  eventEndTime.value = event.endTime || "";
+  eventAllDay.checked = Boolean(event.allDay);
   eventNotes.value = event.notes;
+  syncAllDayFields();
   formTitle.textContent = "編輯活動";
   saveButton.textContent = "更新活動";
   cancelEditButton.hidden = false;
@@ -1109,7 +1196,8 @@ function deleteEvent(id) {
 function resetForm() {
   editingId.value = "";
   eventForm.reset();
-  eventCategory.value = "生活";
+  eventAllDay.checked = false;
+  syncAllDayFields();
   formTitle.textContent = "新增活動";
   saveButton.textContent = "儲存活動";
   cancelEditButton.hidden = true;
@@ -1127,20 +1215,91 @@ function exportBackup() {
 }
 
 function focusNewEvent() {
+  openDetail();
   resetForm();
   eventTitle.focus();
+}
+
+function syncAllDayFields() {
+  const disabled = eventAllDay.checked;
+  eventStartTime.disabled = disabled;
+  eventEndTime.disabled = disabled;
+  if (disabled) {
+    eventStartTime.value = "";
+    eventEndTime.value = "";
+  }
+}
+
+function toggleKeyboardTimeMode() {
+  keyboardTimeMode = !keyboardTimeMode;
+  applyTimeInputMode();
+  showToast(keyboardTimeMode ? "已切換成鍵盤輸入時間" : "已切回時間選擇器");
+}
+
+function applyTimeInputMode() {
+  [eventStartTime, eventEndTime].forEach((input) => {
+    input.type = keyboardTimeMode ? "text" : "time";
+    input.inputMode = keyboardTimeMode ? "numeric" : "";
+    input.placeholder = keyboardTimeMode ? "例如 0930" : "";
+    if (keyboardTimeMode) {
+      input.maxLength = 5;
+    } else {
+      input.removeAttribute("maxlength");
+    }
+  });
+  keyboardToggle.classList.toggle("is-active", keyboardTimeMode);
+  keyboardToggle.setAttribute("aria-pressed", String(keyboardTimeMode));
+}
+
+function normalizeTimeInput(event) {
+  if (!keyboardTimeMode || event.target.disabled) return;
+  const original = event.target.value.trim();
+  const normalized = parseTimeText(event.target.value);
+  event.target.value = normalized;
+  if (original && !normalized) {
+    showToast("時間格式請輸入 0930 或 09:30");
+  }
+}
+
+function parseTimeText(value) {
+  const text = value.trim();
+  if (!text) return "";
+  const digits = text.replace(/\D/g, "");
+  if (digits.length < 3 || digits.length > 4) return "";
+  const padded = digits.padStart(4, "0");
+  const hour = Number(padded.slice(0, 2));
+  const minute = Number(padded.slice(2, 4));
+  if (hour > 23 || minute > 59) return "";
+  return `${pad(hour)}:${pad(minute)}`;
 }
 
 function handleShortcuts(event) {
   if (event.key === "Escape" && editingId.value) {
     resetForm();
     showToast("已取消編輯");
+    return;
+  }
+  if (event.key === "Escape" && detailPanel.classList.contains("is-open")) {
+    closeDetail();
   }
 }
 
-function scrollDetailsOnSmallScreen() {
-  if (window.matchMedia("(max-width: 980px)").matches) {
-    document.querySelector(".detail-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+function openDetail() {
+  detailPanel.classList.add("is-open");
+  detailPanel.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+}
+
+function closeDetail() {
+  detailPanel.classList.remove("is-open");
+  detailPanel.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+  resetForm();
+}
+
+function handleOverlayClick(event) {
+  if (event.target === detailPanel) {
+    closeDetail();
   }
 }
 
@@ -1164,7 +1323,11 @@ function createId() {
 function getEventsForDate(dateKey) {
   return events
     .filter((event) => event.date === dateKey)
-    .sort((a, b) => (a.time || "99:99").localeCompare(b.time || "99:99"));
+    .sort((a, b) => {
+      const aTime = a.allDay ? "00:00" : a.startTime || a.time || "99:99";
+      const bTime = b.allDay ? "00:00" : b.startTime || b.time || "99:99";
+      return aTime.localeCompare(bTime);
+    });
 }
 
 function toDateKey(date) {
@@ -1188,6 +1351,16 @@ function formatFullDate(dateKey) {
 function formatShortDate(dateKey) {
   const [year, month, day] = dateKey.split("-").map(Number);
   return `${year}/${month}/${day}`;
+}
+
+function formatEventTime(event) {
+  if (event.allDay) return "整天";
+  const start = event.startTime || event.time || "";
+  const end = event.endTime || "";
+  if (start && end) return `${start} - ${end}`;
+  if (start) return start;
+  if (end) return `到 ${end}`;
+  return "未設定時間";
 }
 
   </script>
