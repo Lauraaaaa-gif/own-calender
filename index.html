@@ -1194,6 +1194,9 @@ const app = firebaseReady ? firebase.initializeApp(firebaseConfig) : null;
 const db = firebaseReady ? firebase.firestore(app) : null;
 const auth = firebaseReady ? firebase.auth(app) : null;
 const provider = firebaseReady ? new firebase.auth.GoogleAuthProvider() : null;
+if (provider) {
+  provider.setCustomParameters({ prompt: "select_account" });
+}
 const DEFAULT_EVENT_COLOR = "lavender";
 const EVENT_COLOR_VALUES = ["lavender", "blue", "mint", "amber", "rose"];
 
@@ -1258,6 +1261,12 @@ function initCloud() {
     updateAuthUi();
   });
 
+  auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(() => {
+    return auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+  }).catch(() => {
+    showToast("此瀏覽器限制登入狀態保存，請避免使用無痕模式");
+  });
+
   auth.getRedirectResult().catch((error) => {
     showToast(getAuthErrorMessage(error));
   });
@@ -1295,7 +1304,7 @@ async function handleAuthClick() {
       await auth.signOut();
       showToast("已登出管理模式");
     } else {
-      if (shouldUseRedirectLogin()) {
+      if (shouldUseRedirectFirst()) {
         await auth.signInWithRedirect(provider);
         return;
       }
@@ -1311,8 +1320,11 @@ async function handleAuthClick() {
   }
 }
 
-function shouldUseRedirectLogin() {
-  return window.matchMedia("(max-width: 760px)").matches || "ontouchstart" in window;
+function shouldUseRedirectFirst() {
+  const userAgent = navigator.userAgent || "";
+  const isStandaloneIos = "standalone" in navigator && navigator.standalone;
+  const isEmbeddedBrowser = /FBAN|FBAV|Instagram|Line|MicroMessenger/i.test(userAgent);
+  return isStandaloneIos || isEmbeddedBrowser;
 }
 
 function shouldRetryWithRedirect(error) {
@@ -1336,6 +1348,9 @@ function getAuthErrorMessage(error) {
   }
   if (error?.code === "auth/operation-not-allowed") {
     return "請先啟用 Google 登入";
+  }
+  if (error?.code === "auth/web-storage-unsupported") {
+    return "此瀏覽器禁止登入儲存，請關閉無痕模式或改用 Safari/Chrome";
   }
   return "登入失敗，請稍後再試";
 }
