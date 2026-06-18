@@ -6,25 +6,30 @@
   <title>自用日曆</title>
   <style>
 :root {
-  --bg: #f3f1eb;
-  --paper: #fffdf8;
-  --surface: rgba(255, 253, 248, 0.88);
-  --surface-solid: #fffdf8;
-  --surface-soft: #f7f4ed;
-  --ink: #1c2420;
-  --muted: #6f756e;
-  --faint: #9ca299;
-  --line: rgba(42, 49, 43, 0.12);
-  --line-strong: rgba(42, 49, 43, 0.22);
-  --accent: #2f7d5c;
-  --accent-strong: #1e5f45;
-  --accent-soft: #e4f0e8;
-  --blue: #386b9f;
-  --violet: #745da6;
-  --amber: #b8772b;
-  --rose: #b84b56;
-  --shadow-lg: 0 28px 80px rgba(31, 39, 33, 0.16);
-  --shadow-sm: 0 10px 24px rgba(31, 39, 33, 0.08);
+  --bg: #efeee8;
+  --ink: #151816;
+  --ink-soft: #343a35;
+  --muted: #72766f;
+  --faint: #a8aaa2;
+  --paper: #fffefa;
+  --paper-soft: #f8f5ee;
+  --glass: rgba(255, 254, 250, 0.82);
+  --glass-strong: rgba(255, 254, 250, 0.94);
+  --line: rgba(21, 24, 22, 0.12);
+  --line-strong: rgba(21, 24, 22, 0.2);
+  --accent: #245f49;
+  --accent-strong: #123f30;
+  --accent-soft: #dfece5;
+  --gold: #b58b4a;
+  --gold-soft: #efe5d2;
+  --wine: #9d4652;
+  --blue: #355f88;
+  --violet: #69558e;
+  --amber: #a96f30;
+  --radius: 8px;
+  --shadow-xl: 0 30px 90px rgba(22, 25, 23, 0.18);
+  --shadow-md: 0 16px 38px rgba(22, 25, 23, 0.12);
+  --shadow-sm: 0 8px 20px rgba(22, 25, 23, 0.08);
 }
 
 * {
@@ -40,9 +45,9 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background:
-    radial-gradient(circle at 18% 8%, rgba(47, 125, 92, 0.16), transparent 28%),
-    radial-gradient(circle at 86% 18%, rgba(184, 119, 43, 0.12), transparent 26%),
-    linear-gradient(135deg, #f8f5ef 0%, #eeeee8 46%, #f6f2eb 100%);
+    linear-gradient(115deg, rgba(18, 63, 48, 0.12), transparent 32%),
+    linear-gradient(245deg, rgba(181, 139, 74, 0.16), transparent 36%),
+    linear-gradient(180deg, #faf7ef 0%, #ebece6 54%, #f5f2ea 100%);
   font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", Arial, sans-serif;
 }
 
@@ -51,11 +56,11 @@ body::before {
   inset: 0;
   pointer-events: none;
   content: "";
-  background-image:
-    linear-gradient(rgba(28, 36, 32, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(28, 36, 32, 0.025) 1px, transparent 1px);
-  background-size: 34px 34px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 78%);
+  background:
+    linear-gradient(90deg, rgba(21, 24, 22, 0.035) 1px, transparent 1px),
+    linear-gradient(rgba(21, 24, 22, 0.03) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 76%);
 }
 
 button,
@@ -72,29 +77,41 @@ button {
 .app-shell {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 390px;
-  gap: 22px;
-  width: min(1480px, 100%);
+  grid-template-columns: minmax(0, 1fr) 410px;
+  gap: 24px;
+  width: min(1500px, 100%);
   min-height: 100vh;
   margin: 0 auto;
-  padding: 26px;
+  padding: 28px;
 }
 
 .calendar-panel,
 .detail-panel {
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.68);
-  background: var(--surface);
-  box-shadow: var(--shadow-lg);
-  backdrop-filter: blur(18px);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: var(--radius);
+  background: var(--glass);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(22px);
+}
+
+.calendar-panel::before,
+.detail-panel::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  content: "";
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.64), transparent 32%),
+    linear-gradient(90deg, rgba(181, 139, 74, 0.18), transparent 34%, transparent 66%, rgba(36, 95, 73, 0.1));
 }
 
 .calendar-panel {
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: 26px;
-  border-radius: 8px;
+  padding: 28px;
 }
 
 .detail-panel {
@@ -102,18 +119,12 @@ button {
   flex-direction: column;
   gap: 18px;
   min-width: 0;
-  padding: 22px;
-  border-radius: 8px;
+  padding: 24px;
 }
 
-.calendar-panel::after,
-.detail-panel::after {
-  position: absolute;
-  inset: 1px;
-  z-index: -1;
-  border-radius: 8px;
-  content: "";
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 255, 255, 0.24));
+.calendar-panel > *,
+.detail-panel > * {
+  position: relative;
 }
 
 .topbar,
@@ -129,21 +140,23 @@ button {
 .brand-block {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 15px;
   min-width: 0;
 }
 
 .brand-mark {
   position: relative;
   flex: 0 0 auto;
-  width: 48px;
-  height: 48px;
-  border: 1px solid rgba(47, 125, 92, 0.26);
-  border-radius: 8px;
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(181, 139, 74, 0.5);
+  border-radius: var(--radius);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.2)),
-    var(--accent-soft);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8), var(--shadow-sm);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.2)),
+    linear-gradient(135deg, var(--accent-soft), var(--gold-soft));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 14px 28px rgba(18, 63, 48, 0.14);
 }
 
 .brand-mark::before,
@@ -153,26 +166,26 @@ button {
 }
 
 .brand-mark::before {
-  inset: 12px 11px 10px;
-  border: 2px solid var(--accent);
-  border-top-width: 7px;
-  border-radius: 5px;
+  inset: 13px 12px 11px;
+  border: 2px solid var(--accent-strong);
+  border-top-width: 8px;
+  border-radius: 6px;
 }
 
 .brand-mark::after {
-  left: 16px;
-  right: 16px;
-  top: 26px;
+  left: 17px;
+  right: 17px;
+  top: 28px;
   height: 2px;
-  background: var(--accent);
-  box-shadow: 0 6px 0 var(--accent);
+  background: var(--gold);
+  box-shadow: 0 7px 0 var(--gold);
 }
 
 .eyebrow {
-  margin: 0 0 6px;
-  color: var(--accent-strong);
-  font-size: 0.75rem;
-  font-weight: 800;
+  margin: 0 0 7px;
+  color: var(--gold);
+  font-size: 0.74rem;
+  font-weight: 900;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -187,18 +200,22 @@ p {
 
 h1 {
   margin-bottom: 0;
-  font-size: clamp(1.9rem, 4vw, 3.1rem);
+  color: var(--ink);
+  font-size: clamp(2rem, 4vw, 3.25rem);
   line-height: 1;
+  font-weight: 900;
 }
 
 h2 {
   margin-bottom: 0;
-  font-size: 1.42rem;
+  color: var(--ink);
+  font-size: 1.45rem;
   line-height: 1.28;
 }
 
 h3 {
   margin-bottom: 14px;
+  color: var(--ink-soft);
   font-size: 1rem;
   line-height: 1.2;
 }
@@ -213,10 +230,12 @@ h3 {
 
 .month-controls {
   padding: 5px;
-  border: 1px solid rgba(42, 49, 43, 0.09);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.52);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(21, 24, 22, 0.08);
+  border-radius: var(--radius);
+  background: rgba(255, 254, 250, 0.66);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.82),
+    0 10px 24px rgba(21, 24, 22, 0.06);
 }
 
 .icon-button,
@@ -226,12 +245,12 @@ h3 {
 .danger-button {
   min-height: 42px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius);
   transition:
-    transform 150ms ease,
-    background 150ms ease,
-    border-color 150ms ease,
-    box-shadow 150ms ease;
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .icon-button {
@@ -247,33 +266,33 @@ h3 {
 .today-button,
 .secondary-button {
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.72);
   border-color: var(--line);
 }
 
 .today-button {
-  padding: 0 17px;
-  font-weight: 800;
+  padding: 0 18px;
+  font-weight: 900;
 }
 
 .primary-button {
   padding: 0 18px;
   color: #fff;
-  background: linear-gradient(180deg, #388966, var(--accent-strong));
-  box-shadow: 0 12px 22px rgba(30, 95, 69, 0.22);
-  font-weight: 800;
+  background: linear-gradient(180deg, #2d7056, var(--accent-strong));
+  box-shadow: 0 16px 30px rgba(18, 63, 48, 0.22);
+  font-weight: 900;
 }
 
 .secondary-button,
 .danger-button {
   padding: 0 14px;
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .danger-button {
   color: #fff;
-  background: linear-gradient(180deg, #c85a64, var(--rose));
-  box-shadow: 0 10px 18px rgba(184, 75, 86, 0.18);
+  background: linear-gradient(180deg, #b95a65, var(--wine));
+  box-shadow: 0 12px 22px rgba(157, 70, 82, 0.18);
 }
 
 .compact {
@@ -288,7 +307,7 @@ button:hover {
 }
 
 .icon-button:hover {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.78);
 }
 
 button:active {
@@ -299,24 +318,43 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(47, 125, 92, 0.22);
+  outline: 3px solid rgba(181, 139, 74, 0.28);
   outline-offset: 2px;
 }
 
 .month-title {
-  margin: 26px 0 16px;
+  margin: 28px 0 16px;
   padding: 18px 0 0;
   border-top: 1px solid var(--line);
 }
 
+.month-title > div {
+  min-width: 0;
+}
+
 .month-title h2 {
-  font-size: 1.58rem;
+  font-size: 1.66rem;
+  font-weight: 900;
+}
+
+.month-jump {
+  display: grid;
+  flex: 0 0 170px;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.month-jump input {
+  height: 38px;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .month-title p {
   margin-bottom: 0;
   color: var(--muted);
-  font-weight: 800;
+  font-weight: 900;
 }
 
 .weekday-row,
@@ -329,15 +367,16 @@ textarea:focus-visible {
   gap: 8px;
   margin-bottom: 9px;
   color: var(--muted);
-  font-size: 0.84rem;
+  font-size: 0.83rem;
   font-weight: 900;
   text-align: center;
 }
 
 .weekday-row span {
   padding: 8px 0;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.56);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.46);
 }
 
 .calendar-grid {
@@ -349,16 +388,16 @@ textarea:focus-visible {
   position: relative;
   display: flex;
   flex-direction: column;
-  min-height: 122px;
+  min-height: 124px;
   padding: 11px;
   overflow: hidden;
   color: var(--ink);
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(255, 253, 248, 0.78)),
-    var(--surface-solid);
-  border: 1px solid rgba(42, 49, 43, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 5px 14px rgba(31, 39, 33, 0.045);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 254, 250, 0.82)),
+    var(--paper);
+  border: 1px solid rgba(21, 24, 22, 0.1);
+  border-radius: var(--radius);
+  box-shadow: 0 6px 18px rgba(21, 24, 22, 0.045);
   text-align: left;
 }
 
@@ -370,26 +409,38 @@ textarea:focus-visible {
   background: transparent;
 }
 
+.day-cell::after {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  width: 28px;
+  height: 1px;
+  content: "";
+  background: rgba(181, 139, 74, 0.26);
+}
+
 .day-cell.is-muted {
   color: var(--faint);
-  background: rgba(255, 255, 255, 0.42);
+  background: rgba(255, 255, 255, 0.4);
   box-shadow: none;
 }
 
 .day-cell.is-today {
-  border-color: rgba(47, 125, 92, 0.62);
+  border-color: rgba(181, 139, 74, 0.62);
 }
 
 .day-cell.is-today::before {
-  background: var(--accent);
+  background: linear-gradient(90deg, var(--gold), var(--accent));
 }
 
 .day-cell.is-selected {
   background:
-    linear-gradient(180deg, rgba(228, 240, 232, 0.9), rgba(255, 253, 248, 0.82)),
+    linear-gradient(180deg, rgba(223, 236, 229, 0.9), rgba(255, 254, 250, 0.88)),
     var(--accent-soft);
-  border-color: rgba(30, 95, 69, 0.48);
-  box-shadow: inset 0 0 0 1px rgba(30, 95, 69, 0.14), 0 12px 26px rgba(30, 95, 69, 0.12);
+  border-color: rgba(18, 63, 48, 0.48);
+  box-shadow:
+    inset 0 0 0 1px rgba(18, 63, 48, 0.12),
+    0 16px 32px rgba(18, 63, 48, 0.13);
 }
 
 .day-number {
@@ -406,9 +457,10 @@ textarea:focus-visible {
   min-width: 26px;
   padding: 4px 8px;
   color: #fff;
-  background: linear-gradient(180deg, #3b936d, var(--accent-strong));
+  background: linear-gradient(180deg, #c19a5d, #8f6b35);
+  border: 1px solid rgba(255, 255, 255, 0.36);
   border-radius: 999px;
-  box-shadow: 0 8px 14px rgba(30, 95, 69, 0.18);
+  box-shadow: 0 8px 16px rgba(143, 107, 53, 0.18);
   font-size: 0.76rem;
   text-align: center;
 }
@@ -423,8 +475,9 @@ textarea:focus-visible {
 .preview-line {
   overflow: hidden;
   padding: 5px 7px;
+  border: 1px solid rgba(21, 24, 22, 0.05);
   border-radius: 7px;
-  background: rgba(255, 255, 255, 0.64);
+  background: rgba(255, 255, 255, 0.68);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -433,12 +486,19 @@ textarea:focus-visible {
   min-width: 0;
 }
 
+.detail-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
 .count-pill {
   flex: 0 0 auto;
   padding: 8px 12px;
   color: var(--accent-strong);
-  background: var(--accent-soft);
-  border: 1px solid rgba(47, 125, 92, 0.16);
+  background: linear-gradient(180deg, var(--accent-soft), rgba(255, 255, 255, 0.74));
+  border: 1px solid rgba(36, 95, 73, 0.18);
   border-radius: 999px;
   font-size: 0.88rem;
   font-weight: 900;
@@ -452,9 +512,19 @@ textarea:focus-visible {
 
 .form-panel {
   padding: 18px;
-  border: 1px solid rgba(42, 49, 43, 0.09);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid rgba(21, 24, 22, 0.09);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.34)),
+    rgba(255, 255, 255, 0.48);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.66);
+}
+
+.form-date {
+  margin: -4px 0 14px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
 }
 
 form {
@@ -475,10 +545,10 @@ select,
 textarea {
   width: 100%;
   color: var(--ink);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 255, 255, 0.88);
   border: 1px solid var(--line);
-  border-radius: 8px;
-  box-shadow: inset 0 1px 2px rgba(31, 39, 33, 0.04);
+  border-radius: var(--radius);
+  box-shadow: inset 0 1px 2px rgba(21, 24, 22, 0.04);
 }
 
 input,
@@ -495,7 +565,7 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  color: #a4aaa2;
+  color: #a4a79f;
 }
 
 .two-column {
@@ -515,18 +585,49 @@ textarea::placeholder {
   color: var(--muted);
   background: rgba(255, 255, 255, 0.62);
   border: 1px dashed var(--line-strong);
-  border-radius: 8px;
+  border-radius: var(--radius);
+  cursor: pointer;
   text-align: center;
+}
+
+.empty-state strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 20;
+  max-width: min(360px, calc(100vw - 32px));
+  padding: 12px 14px;
+  color: #fff;
+  background: linear-gradient(180deg, #2d7056, var(--accent-strong));
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  font-weight: 900;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .event-card {
   display: grid;
   grid-template-columns: 8px 1fr;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.74);
-  border: 1px solid rgba(42, 49, 43, 0.1);
-  border-radius: 8px;
-  box-shadow: 0 8px 18px rgba(31, 39, 33, 0.06);
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid rgba(21, 24, 22, 0.1);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 24px rgba(21, 24, 22, 0.07);
 }
 
 .event-color {
@@ -542,7 +643,7 @@ textarea::placeholder {
 }
 
 .event-card[data-category="重要"] .event-color {
-  background: var(--rose);
+  background: var(--wine);
 }
 
 .event-card[data-category="其他"] .event-color {
@@ -556,13 +657,14 @@ textarea::placeholder {
 
 .event-meta {
   margin-bottom: 7px;
-  color: var(--accent-strong);
+  color: var(--gold);
   font-size: 0.8rem;
   font-weight: 900;
 }
 
 .event-content h4 {
   margin-bottom: 8px;
+  color: var(--ink);
   font-size: 1.02rem;
   line-height: 1.32;
   overflow-wrap: anywhere;
@@ -593,7 +695,7 @@ textarea::placeholder {
 
   .calendar-panel,
   .detail-panel {
-    padding: 14px;
+    padding: 15px;
   }
 
   .topbar,
@@ -603,13 +705,22 @@ textarea::placeholder {
     flex-direction: column;
   }
 
+  .month-jump,
+  .detail-actions {
+    width: 100%;
+  }
+
+  .detail-actions {
+    justify-content: space-between;
+  }
+
   .brand-block {
     align-items: flex-start;
   }
 
   .brand-mark {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
   }
 
   .month-controls {
@@ -647,6 +758,11 @@ textarea::placeholder {
     align-items: stretch;
     flex-direction: column;
   }
+
+  .toast {
+    right: 12px;
+    bottom: 12px;
+  }
 }
 
   </style>
@@ -658,8 +774,8 @@ textarea::placeholder {
         <div class="brand-block">
           <span class="brand-mark" aria-hidden="true"></span>
           <div>
-          <p class="eyebrow">Personal Calendar</p>
-          <h1>自用日曆</h1>
+            <p class="eyebrow">Private Atelier</p>
+            <h1>通勤用日曆</h1>
           </div>
         </div>
         <div class="month-controls" aria-label="月份控制">
@@ -670,8 +786,14 @@ textarea::placeholder {
       </header>
 
       <div class="month-title">
-        <h2 id="monthLabel"></h2>
-        <p id="monthSummary"></p>
+        <div>
+          <h2 id="monthLabel"></h2>
+          <p id="monthSummary"></p>
+        </div>
+        <label class="month-jump">
+          跳到月份
+          <input id="jumpMonth" type="month">
+        </label>
       </div>
 
       <div class="weekday-row" aria-hidden="true">
@@ -692,11 +814,15 @@ textarea::placeholder {
           <p class="eyebrow">Selected Date</p>
           <h2 id="selectedDateLabel"></h2>
         </div>
-        <span class="count-pill" id="selectedCount">0 筆</span>
+        <div class="detail-actions">
+          <button class="secondary-button compact" type="button" id="focusEventButton">新增</button>
+          <span class="count-pill" id="selectedCount">0 筆</span>
+        </div>
       </header>
 
       <section class="form-panel" aria-label="新增或編輯活動">
         <h3 id="formTitle">新增活動</h3>
+        <p class="form-date" id="formDateText"></p>
         <form id="eventForm">
           <input type="hidden" id="editingId">
           <label>
@@ -754,6 +880,8 @@ textarea::placeholder {
       </div>
     </article>
   </template>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script>
 const STORAGE_KEY = "personal-calendar-events-v1";
 
@@ -762,6 +890,7 @@ const monthSummary = document.querySelector("#monthSummary");
 const calendarGrid = document.querySelector("#calendarGrid");
 const selectedDateLabel = document.querySelector("#selectedDateLabel");
 const selectedCount = document.querySelector("#selectedCount");
+const jumpMonth = document.querySelector("#jumpMonth");
 const eventList = document.querySelector("#eventList");
 const eventForm = document.querySelector("#eventForm");
 const editingId = document.querySelector("#editingId");
@@ -770,8 +899,11 @@ const eventTime = document.querySelector("#eventTime");
 const eventCategory = document.querySelector("#eventCategory");
 const eventNotes = document.querySelector("#eventNotes");
 const formTitle = document.querySelector("#formTitle");
+const formDateText = document.querySelector("#formDateText");
 const saveButton = document.querySelector("#saveButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
+const focusEventButton = document.querySelector("#focusEventButton");
+const toast = document.querySelector("#toast");
 const eventTemplate = document.querySelector("#eventTemplate");
 
 const today = new Date();
@@ -783,8 +915,11 @@ document.querySelector("#prevMonth").addEventListener("click", () => changeMonth
 document.querySelector("#nextMonth").addEventListener("click", () => changeMonth(1));
 document.querySelector("#todayButton").addEventListener("click", goToday);
 document.querySelector("#exportButton").addEventListener("click", exportBackup);
+jumpMonth.addEventListener("change", jumpToMonth);
+focusEventButton.addEventListener("click", focusNewEvent);
 cancelEditButton.addEventListener("click", resetForm);
 eventForm.addEventListener("submit", saveEvent);
+document.addEventListener("keydown", handleShortcuts);
 
 render();
 
@@ -813,6 +948,15 @@ function goToday() {
   render();
 }
 
+function jumpToMonth() {
+  if (!jumpMonth.value) return;
+  const [year, month] = jumpMonth.value.split("-").map(Number);
+  visibleDate = new Date(year, month - 1, 1);
+  selectedDate = `${year}-${pad(month)}-01`;
+  resetForm();
+  render();
+}
+
 function render() {
   renderMonthHeader();
   renderCalendar();
@@ -825,6 +969,7 @@ function renderMonthHeader() {
   const monthEvents = events.filter((event) => event.date.startsWith(`${year}-${pad(month)}-`));
   monthLabel.textContent = `${year} 年 ${month} 月`;
   monthSummary.textContent = `${monthEvents.length} 筆活動`;
+  jumpMonth.value = `${year}-${pad(month)}`;
 }
 
 function renderCalendar() {
@@ -871,6 +1016,7 @@ function renderCalendar() {
       }
       resetForm();
       render();
+      scrollDetailsOnSmallScreen();
     });
 
     calendarGrid.append(button);
@@ -881,12 +1027,14 @@ function renderDetails() {
   const dayEvents = getEventsForDate(selectedDate);
   selectedDateLabel.textContent = formatFullDate(selectedDate);
   selectedCount.textContent = `${dayEvents.length} 筆`;
+  formDateText.textContent = `活動會儲存在 ${formatShortDate(selectedDate)}`;
   eventList.innerHTML = "";
 
   if (!dayEvents.length) {
     const empty = document.createElement("p");
     empty.className = "empty-state";
-    empty.textContent = "這一天還沒有活動。";
+    empty.innerHTML = "<strong>這一天還沒有活動</strong>新增第一筆活動後，會顯示在這裡。";
+    empty.addEventListener("click", focusNewEvent);
     eventList.append(empty);
     return;
   }
@@ -918,7 +1066,8 @@ function saveEvent(event) {
     updatedAt: new Date().toISOString(),
   };
 
-  if (editingId.value) {
+  const wasEditing = Boolean(editingId.value);
+  if (wasEditing) {
     events = events.map((item) => (item.id === editingId.value ? payload : item));
   } else {
     events.push(payload);
@@ -927,6 +1076,7 @@ function saveEvent(event) {
   persistEvents();
   resetForm();
   render();
+  showToast(wasEditing ? "活動已更新" : "活動已儲存");
 }
 
 function editEvent(id) {
@@ -941,6 +1091,7 @@ function editEvent(id) {
   saveButton.textContent = "更新活動";
   cancelEditButton.hidden = false;
   eventTitle.focus();
+  showToast("正在編輯活動");
 }
 
 function deleteEvent(id) {
@@ -952,6 +1103,7 @@ function deleteEvent(id) {
   persistEvents();
   resetForm();
   render();
+  showToast("活動已刪除");
 }
 
 function resetForm() {
@@ -971,6 +1123,35 @@ function exportBackup() {
   anchor.download = `自用日曆備份-${toDateKey(new Date())}.json`;
   anchor.click();
   URL.revokeObjectURL(url);
+  showToast("已下載備份檔");
+}
+
+function focusNewEvent() {
+  resetForm();
+  eventTitle.focus();
+}
+
+function handleShortcuts(event) {
+  if (event.key === "Escape" && editingId.value) {
+    resetForm();
+    showToast("已取消編輯");
+  }
+}
+
+function scrollDetailsOnSmallScreen() {
+  if (window.matchMedia("(max-width: 980px)").matches) {
+    document.querySelector(".detail-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+let toastTimer;
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("is-visible");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove("is-visible");
+  }, 1800);
 }
 
 function createId() {
@@ -1002,6 +1183,11 @@ function formatFullDate(dateKey) {
   const date = new Date(year, month - 1, day);
   const weekday = ["星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"][date.getDay()];
   return `${year} 年 ${month} 月 ${day} 日 ${weekday}`;
+}
+
+function formatShortDate(dateKey) {
+  const [year, month, day] = dateKey.split("-").map(Number);
+  return `${year}/${month}/${day}`;
 }
 
   </script>
