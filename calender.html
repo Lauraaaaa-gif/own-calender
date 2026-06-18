@@ -242,11 +242,22 @@ h3 {
 }
 
 .month-controls,
+.auth-controls,
 .form-actions,
 .event-actions {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+.auth-controls {
+  justify-content: flex-end;
+}
+
+.auth-controls span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 900;
 }
 
 .month-controls {
@@ -808,6 +819,11 @@ textarea::placeholder {
     padding: 4px;
   }
 
+  .auth-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
   .today-button {
     flex: 1;
     min-height: 38px;
@@ -893,6 +909,10 @@ textarea::placeholder {
           <button class="icon-button" id="prevMonth" type="button" aria-label="上一個月" title="上一個月">‹</button>
           <button class="today-button" id="todayButton" type="button">今天</button>
           <button class="icon-button" id="nextMonth" type="button" aria-label="下一個月" title="下一個月">›</button>
+        </div>
+        <div class="auth-controls">
+          <span id="authStatus">公開檢視</span>
+          <button class="secondary-button compact" type="button" id="authButton">登入管理</button>
         </div>
       </header>
 
@@ -997,8 +1017,23 @@ textarea::placeholder {
   </template>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
   <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCEsZ7auH2AOVvSTjXpr9n2i7chdbj5h-A",
+  authDomain: "own-calender.firebaseapp.com",
+  projectId: "own-calender",
+  storageBucket: "own-calender.firebasestorage.app",
+  messagingSenderId: "1073057086227",
+  appId: "1:1073057086227:web:73750feee645fcd18978e6",
+};
+
 const STORAGE_KEY = "personal-calendar-events-v1";
+const EVENTS_COLLECTION = "events";
+const ADMIN_DOC_PATH = "appConfig/admin";
 
 const monthLabel = document.querySelector("#monthLabel");
 const monthSummary = document.querySelector("#monthSummary");
@@ -1024,18 +1059,30 @@ const cancelEditButton = document.querySelector("#cancelEditButton");
 const backToEventsButton = document.querySelector("#backToEventsButton");
 const focusEventButton = document.querySelector("#focusEventButton");
 const closeDetailButton = document.querySelector("#closeDetailButton");
+const authStatus = document.querySelector("#authStatus");
+const authButton = document.querySelector("#authButton");
 const toast = document.querySelector("#toast");
 const eventTemplate = document.querySelector("#eventTemplate");
+
+const firebaseReady = typeof firebase !== "undefined";
+const app = firebaseReady ? firebase.initializeApp(firebaseConfig) : null;
+const db = firebaseReady ? firebase.firestore(app) : null;
+const auth = firebaseReady ? firebase.auth(app) : null;
+const provider = firebaseReady ? new firebase.auth.GoogleAuthProvider() : null;
 
 const today = new Date();
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = toDateKey(today);
 let events = loadEvents();
+let currentUser = null;
+let adminUid = "";
+let canManage = false;
 
 document.querySelector("#prevMonth").addEventListener("click", () => changeMonth(-1));
 document.querySelector("#nextMonth").addEventListener("click", () => changeMonth(1));
 document.querySelector("#todayButton").addEventListener("click", goToday);
 document.querySelector("#exportButton").addEventListener("click", exportBackup);
+authButton.addEventListener("click", handleAuthClick);
 jumpMonth.addEventListener("change", jumpToMonth);
 focusEventButton.addEventListener("click", focusNewEvent);
 closeDetailButton.addEventListener("click", closeDetail);
@@ -1049,6 +1096,7 @@ backToEventsButton.addEventListener("click", showEventsView);
 eventForm.addEventListener("submit", saveEvent);
 document.addEventListener("keydown", handleShortcuts);
 
+initCloud();
 render();
 
 function loadEvents() {
@@ -1062,6 +1110,81 @@ function loadEvents() {
 
 function persistEvents() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(events));
+}
+
+function initCloud() {
+  if (!firebaseReady) {
+    authStatus.textContent = "離線檢視";
+    authButton.hidden = true;
+    return;
+  }
+
+  db.collection(EVENTS_COLLECTION).onSnapshot((snapshot) => {
+    events = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    render();
+  }, () => {
+    showToast("讀取雲端活動失敗，請確認 Firestore 已啟用");
+  });
+
+  db.doc(ADMIN_DOC_PATH).onSnapshot((doc) => {
+    adminUid = doc.exists ? doc.data().uid : "";
+    updateAuthUi();
+  });
+
+  auth.onAuthStateChanged(async (user) => {
+    currentUser = user;
+    if (user) {
+      try {
+        await claimAdminIfNeeded(user);
+      } catch {
+        showToast("請先設定 Firestore 規則");
+      }
+    }
+    updateAuthUi();
+  });
+}
+
+async function claimAdminIfNeeded(user) {
+  const adminRef = db.doc(ADMIN_DOC_PATH);
+  const adminDoc = await adminRef.get();
+  if (!adminDoc.exists) {
+    await adminRef.set({
+      uid: user.uid,
+      email: user.email || "",
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+    showToast("已將此帳號設為管理者");
+  }
+}
+
+async function handleAuthClick() {
+  if (!firebaseReady) return;
+  try {
+    if (currentUser) {
+      await auth.signOut();
+      showToast("已登出管理模式");
+    } else {
+      await auth.signInWithPopup(provider);
+    }
+  } catch {
+    showToast("登入失敗，請稍後再試");
+  }
+}
+
+function updateAuthUi() {
+  canManage = Boolean(currentUser && adminUid && currentUser.uid === adminUid);
+  focusEventButton.hidden = !canManage;
+  authButton.textContent = currentUser ? "登出" : "登入管理";
+
+  if (!currentUser) {
+    authStatus.textContent = "公開檢視";
+  } else if (canManage) {
+    authStatus.textContent = "管理模式";
+  } else {
+    authStatus.textContent = "非管理者";
+  }
+
+  renderDetails();
 }
 
 function changeMonth(offset) {
@@ -1163,8 +1286,12 @@ function renderDetails() {
   if (!dayEvents.length) {
     const empty = document.createElement("p");
     empty.className = "empty-state";
-    empty.innerHTML = "<strong>這一天還沒有活動</strong>新增第一筆活動後，會顯示在這裡。";
-    empty.addEventListener("click", focusNewEvent);
+    empty.innerHTML = canManage
+      ? "<strong>這一天還沒有活動</strong>新增第一筆活動後，會顯示在這裡。"
+      : "<strong>這一天還沒有活動</strong>登入管理模式後可以新增活動。";
+    if (canManage) {
+      empty.addEventListener("click", focusNewEvent);
+    }
     eventList.append(empty);
     return;
   }
@@ -1174,14 +1301,23 @@ function renderDetails() {
     node.querySelector(".event-meta").textContent = formatEventTime(event);
     node.querySelector("h4").textContent = event.title;
     node.querySelector("p").textContent = event.notes || "沒有填寫詳細內容。";
-    node.querySelector(".edit-event").addEventListener("click", () => editEvent(event.id));
-    node.querySelector(".delete-event").addEventListener("click", () => deleteEvent(event.id));
+    const actions = node.querySelector(".event-actions");
+    if (canManage) {
+      node.querySelector(".edit-event").addEventListener("click", () => editEvent(event.id));
+      node.querySelector(".delete-event").addEventListener("click", () => deleteEvent(event.id));
+    } else {
+      actions.hidden = true;
+    }
     eventList.append(node);
   });
 }
 
-function saveEvent(event) {
+async function saveEvent(event) {
   event.preventDefault();
+  if (!canManage) {
+    showToast("請先登入管理模式");
+    return;
+  }
   normalizeTimeField(eventStartTime);
   normalizeTimeField(eventEndTime);
   const title = eventTitle.value.trim();
@@ -1199,13 +1335,7 @@ function saveEvent(event) {
   };
 
   const wasEditing = Boolean(editingId.value);
-  if (wasEditing) {
-    events = events.map((item) => (item.id === editingId.value ? payload : item));
-  } else {
-    events.push(payload);
-  }
-
-  persistEvents();
+  await saveEventToStore(payload);
   resetForm();
   render();
   showEventsView();
@@ -1213,6 +1343,10 @@ function saveEvent(event) {
 }
 
 function editEvent(id) {
+  if (!canManage) {
+    showToast("請先登入管理模式");
+    return;
+  }
   const event = events.find((item) => item.id === id);
   if (!event) return;
   editingId.value = event.id;
@@ -1230,16 +1364,38 @@ function editEvent(id) {
   showToast("正在編輯活動");
 }
 
-function deleteEvent(id) {
+async function deleteEvent(id) {
+  if (!canManage) {
+    showToast("請先登入管理模式");
+    return;
+  }
   const event = events.find((item) => item.id === id);
   if (!event) return;
   const ok = window.confirm(`確定要刪除「${event.title}」嗎？`);
   if (!ok) return;
-  events = events.filter((item) => item.id !== id);
-  persistEvents();
+  await deleteEventFromStore(id);
   resetForm();
   render();
   showToast("活動已刪除");
+}
+
+async function saveEventToStore(event) {
+  if (db) {
+    await db.collection(EVENTS_COLLECTION).doc(event.id).set(event);
+    return;
+  }
+  const wasEditing = events.some((item) => item.id === event.id);
+  events = wasEditing ? events.map((item) => (item.id === event.id ? event : item)) : [...events, event];
+  persistEvents();
+}
+
+async function deleteEventFromStore(id) {
+  if (db) {
+    await db.collection(EVENTS_COLLECTION).doc(id).delete();
+    return;
+  }
+  events = events.filter((item) => item.id !== id);
+  persistEvents();
 }
 
 function resetForm() {
@@ -1264,6 +1420,10 @@ function exportBackup() {
 }
 
 function focusNewEvent() {
+  if (!canManage) {
+    showToast("請先登入管理模式");
+    return;
+  }
   openDetail();
   resetForm();
   showFormView();
