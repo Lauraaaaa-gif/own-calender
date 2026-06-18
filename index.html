@@ -6,30 +6,30 @@
   <title>自用日曆</title>
   <style>
 :root {
-  --bg: #efeee8;
-  --ink: #151816;
-  --ink-soft: #343a35;
-  --muted: #72766f;
-  --faint: #a8aaa2;
-  --paper: #fffefa;
-  --paper-soft: #f8f5ee;
-  --glass: rgba(255, 254, 250, 0.82);
-  --glass-strong: rgba(255, 254, 250, 0.94);
-  --line: rgba(21, 24, 22, 0.12);
-  --line-strong: rgba(21, 24, 22, 0.2);
-  --accent: #245f49;
-  --accent-strong: #123f30;
-  --accent-soft: #dfece5;
-  --gold: #b58b4a;
-  --gold-soft: #efe5d2;
-  --wine: #9d4652;
-  --blue: #355f88;
-  --violet: #69558e;
-  --amber: #a96f30;
+  --bg: #eef5ff;
+  --ink: #1f2742;
+  --ink-soft: #3d4666;
+  --muted: #717895;
+  --faint: #a9afc7;
+  --paper: #fbfdff;
+  --paper-soft: #f3f6ff;
+  --glass: rgba(251, 253, 255, 0.82);
+  --glass-strong: rgba(251, 253, 255, 0.95);
+  --line: rgba(64, 72, 115, 0.13);
+  --line-strong: rgba(64, 72, 115, 0.24);
+  --accent: #7388df;
+  --accent-strong: #4658a8;
+  --accent-soft: #e7ecff;
+  --gold: #7f8fe8;
+  --gold-soft: #eef2ff;
+  --wine: #9b5ca8;
+  --blue: #6fa8dc;
+  --violet: #9578d7;
+  --amber: #6f8edb;
   --radius: 8px;
-  --shadow-xl: 0 30px 90px rgba(22, 25, 23, 0.18);
-  --shadow-md: 0 16px 38px rgba(22, 25, 23, 0.12);
-  --shadow-sm: 0 8px 20px rgba(22, 25, 23, 0.08);
+  --shadow-xl: 0 30px 90px rgba(65, 78, 135, 0.2);
+  --shadow-md: 0 16px 38px rgba(65, 78, 135, 0.13);
+  --shadow-sm: 0 8px 20px rgba(65, 78, 135, 0.09);
 }
 
 * {
@@ -45,9 +45,9 @@ body {
   min-height: 100vh;
   color: var(--ink);
   background:
-    linear-gradient(115deg, rgba(18, 63, 48, 0.12), transparent 32%),
-    linear-gradient(245deg, rgba(181, 139, 74, 0.16), transparent 36%),
-    linear-gradient(180deg, #faf7ef 0%, #ebece6 54%, #f5f2ea 100%);
+    linear-gradient(125deg, rgba(176, 211, 255, 0.76), transparent 34%),
+    linear-gradient(245deg, rgba(213, 195, 255, 0.72), transparent 38%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4ff 48%, #f4efff 100%);
   font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", Arial, sans-serif;
 }
 
@@ -57,8 +57,8 @@ body::before {
   pointer-events: none;
   content: "";
   background:
-    linear-gradient(90deg, rgba(21, 24, 22, 0.035) 1px, transparent 1px),
-    linear-gradient(rgba(21, 24, 22, 0.03) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(70, 88, 168, 0.035) 1px, transparent 1px),
+    linear-gradient(rgba(70, 88, 168, 0.03) 1px, transparent 1px);
   background-size: 42px 42px;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.72), transparent 76%);
 }
@@ -105,8 +105,8 @@ body.modal-open {
   pointer-events: none;
   content: "";
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.64), transparent 32%),
-    linear-gradient(90deg, rgba(181, 139, 74, 0.18), transparent 34%, transparent 66%, rgba(36, 95, 73, 0.1));
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), transparent 34%),
+    linear-gradient(120deg, rgba(190, 222, 255, 0.4), transparent 36%, transparent 64%, rgba(215, 198, 255, 0.44));
 }
 
 .calendar-panel {
@@ -124,7 +124,7 @@ body.modal-open {
   align-items: center;
   justify-content: center;
   padding: 22px;
-  background: rgba(21, 24, 22, 0.38);
+  background: rgba(37, 43, 78, 0.34);
   backdrop-filter: blur(10px);
 }
 
@@ -170,14 +170,14 @@ body.modal-open {
   flex: 0 0 auto;
   width: 52px;
   height: 52px;
-  border: 1px solid rgba(181, 139, 74, 0.5);
+  border: 1px solid rgba(115, 136, 223, 0.48);
   border-radius: var(--radius);
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.2)),
-    linear-gradient(135deg, var(--accent-soft), var(--gold-soft));
+    linear-gradient(135deg, #dff0ff, #efe8ff);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 14px 28px rgba(18, 63, 48, 0.14);
+    0 14px 28px rgba(70, 88, 168, 0.16);
 }
 
 .brand-mark::before,
@@ -198,13 +198,13 @@ body.modal-open {
   right: 17px;
   top: 28px;
   height: 2px;
-  background: var(--gold);
-  box-shadow: 0 7px 0 var(--gold);
+  background: var(--accent);
+  box-shadow: 0 7px 0 var(--violet);
 }
 
 .eyebrow {
   margin: 0 0 7px;
-  color: var(--gold);
+  color: var(--accent-strong);
   font-size: 0.74rem;
   font-weight: 900;
   letter-spacing: 0;
@@ -299,8 +299,8 @@ h3 {
 .primary-button {
   padding: 0 18px;
   color: #fff;
-  background: linear-gradient(180deg, #2d7056, var(--accent-strong));
-  box-shadow: 0 16px 30px rgba(18, 63, 48, 0.22);
+  background: linear-gradient(180deg, #8fa2f5, var(--accent-strong));
+  box-shadow: 0 16px 30px rgba(70, 88, 168, 0.24);
   font-weight: 900;
 }
 
@@ -312,8 +312,8 @@ h3 {
 
 .danger-button {
   color: #fff;
-  background: linear-gradient(180deg, #b95a65, var(--wine));
-  box-shadow: 0 12px 22px rgba(157, 70, 82, 0.18);
+  background: linear-gradient(180deg, #b47bdd, var(--wine));
+  box-shadow: 0 12px 22px rgba(155, 92, 168, 0.18);
 }
 
 .compact {
@@ -339,7 +339,7 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid rgba(181, 139, 74, 0.28);
+  outline: 3px solid rgba(115, 136, 223, 0.28);
   outline-offset: 2px;
 }
 
@@ -437,7 +437,7 @@ textarea:focus-visible {
   width: 28px;
   height: 1px;
   content: "";
-  background: rgba(181, 139, 74, 0.26);
+  background: rgba(115, 136, 223, 0.28);
 }
 
 .day-cell.is-muted {
@@ -447,21 +447,21 @@ textarea:focus-visible {
 }
 
 .day-cell.is-today {
-  border-color: rgba(181, 139, 74, 0.62);
+  border-color: rgba(115, 136, 223, 0.62);
 }
 
 .day-cell.is-today::before {
-  background: linear-gradient(90deg, var(--gold), var(--accent));
+  background: linear-gradient(90deg, #7fb5ff, #b69cff);
 }
 
 .day-cell.is-selected {
   background:
-    linear-gradient(180deg, rgba(223, 236, 229, 0.9), rgba(255, 254, 250, 0.88)),
+    linear-gradient(180deg, rgba(231, 236, 255, 0.92), rgba(251, 253, 255, 0.9)),
     var(--accent-soft);
-  border-color: rgba(18, 63, 48, 0.48);
+  border-color: rgba(70, 88, 168, 0.48);
   box-shadow:
-    inset 0 0 0 1px rgba(18, 63, 48, 0.12),
-    0 16px 32px rgba(18, 63, 48, 0.13);
+    inset 0 0 0 1px rgba(70, 88, 168, 0.12),
+    0 16px 32px rgba(70, 88, 168, 0.13);
 }
 
 .day-number {
@@ -478,10 +478,10 @@ textarea:focus-visible {
   min-width: 26px;
   padding: 4px 8px;
   color: #fff;
-  background: linear-gradient(180deg, #c19a5d, #8f6b35);
+  background: linear-gradient(180deg, #9ab6ff, #7868d9);
   border: 1px solid rgba(255, 255, 255, 0.36);
   border-radius: 999px;
-  box-shadow: 0 8px 16px rgba(143, 107, 53, 0.18);
+  box-shadow: 0 8px 16px rgba(120, 104, 217, 0.2);
   font-size: 0.76rem;
   text-align: center;
 }
@@ -524,8 +524,8 @@ textarea:focus-visible {
   flex: 0 0 auto;
   padding: 8px 12px;
   color: var(--accent-strong);
-  background: linear-gradient(180deg, var(--accent-soft), rgba(255, 255, 255, 0.74));
-  border: 1px solid rgba(36, 95, 73, 0.18);
+  background: linear-gradient(180deg, var(--accent-soft), rgba(255, 255, 255, 0.78));
+  border: 1px solid rgba(115, 136, 223, 0.2);
   border-radius: 999px;
   font-size: 0.88rem;
   font-weight: 900;
@@ -535,6 +535,11 @@ textarea:focus-visible {
 .events-section {
   padding-top: 18px;
   border-top: 1px solid var(--line);
+}
+
+.form-panel[hidden],
+.events-section[hidden] {
+  display: none;
 }
 
 .form-panel {
@@ -623,99 +628,6 @@ textarea::placeholder {
   box-shadow: none;
 }
 
-.time-popover {
-  position: fixed;
-  z-index: 30;
-  padding: 12px;
-  color: var(--ink);
-  background: rgba(255, 254, 250, 0.96);
-  border: 1px solid rgba(21, 24, 22, 0.16);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-xl);
-  backdrop-filter: blur(18px);
-}
-
-.time-popover[hidden] {
-  display: none;
-}
-
-.time-popover-head,
-.time-popover-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.time-close,
-.keyboard-toggle {
-  display: grid;
-  width: 36px;
-  min-height: 36px;
-  place-items: center;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  font-weight: 900;
-}
-
-.keyboard-toggle {
-  margin-right: auto;
-  font-size: 1rem;
-}
-
-.time-display {
-  margin: 10px 0;
-  padding: 10px;
-  color: var(--accent-strong);
-  background: var(--accent-soft);
-  border-radius: var(--radius);
-  font-size: 1.3rem;
-  font-weight: 900;
-  text-align: center;
-}
-
-.time-columns {
-  display: grid;
-  grid-template-columns: 1.3fr 1fr;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.time-columns p {
-  margin-bottom: 6px;
-  color: var(--muted);
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
-.time-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5px;
-  max-height: 168px;
-  overflow-y: auto;
-}
-
-.minute-grid {
-  grid-template-columns: repeat(2, 1fr);
-}
-
-.time-option {
-  min-height: 34px;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.76);
-  border: 1px solid var(--line);
-  border-radius: 7px;
-  font-weight: 900;
-}
-
-.time-option.is-selected {
-  color: #fff;
-  background: linear-gradient(180deg, #2d7056, var(--accent-strong));
-}
-
 .event-list {
   display: grid;
   gap: 12px;
@@ -746,7 +658,7 @@ textarea::placeholder {
   max-width: min(360px, calc(100vw - 32px));
   padding: 12px 14px;
   color: #fff;
-  background: linear-gradient(180deg, #2d7056, var(--accent-strong));
+  background: linear-gradient(180deg, #8fa2f5, var(--accent-strong));
   border: 1px solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius);
   box-shadow: var(--shadow-md);
@@ -773,7 +685,7 @@ textarea::placeholder {
 }
 
 .event-color {
-  background: var(--accent);
+  background: linear-gradient(180deg, #91c4ff, #a78de8);
 }
 
 .event-content {
@@ -783,7 +695,7 @@ textarea::placeholder {
 
 .event-meta {
   margin-bottom: 7px;
-  color: var(--gold);
+  color: var(--accent-strong);
   font-size: 0.8rem;
   font-weight: 900;
 }
@@ -811,11 +723,20 @@ textarea::placeholder {
 }
 
 @media (max-width: 640px) {
-  .app-shell {
-    padding: 12px;
+  body {
+    min-height: 100svh;
   }
 
-  .calendar-panel,
+  .app-shell {
+    min-height: 100svh;
+    padding: 8px;
+  }
+
+  .calendar-panel {
+    min-height: calc(100svh - 16px);
+    padding: 10px;
+  }
+
   .detail-sheet {
     padding: 15px;
   }
@@ -833,10 +754,44 @@ textarea::placeholder {
   }
 
   .topbar,
-  .detail-header,
-  .month-title {
+  .detail-header {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .topbar {
+    margin-bottom: 8px;
+  }
+
+  .brand-block {
+    display: none;
+  }
+
+  .month-title {
+    align-items: center;
+    flex-direction: row;
+    gap: 8px;
+    margin: 8px 0;
+    padding-top: 8px;
+  }
+
+  .month-title h2 {
+    font-size: 1.45rem;
+  }
+
+  .month-title p {
+    display: none;
+  }
+
+  .month-jump {
+    flex: 0 0 132px;
+    font-size: 0;
+  }
+
+  .month-jump input {
+    height: 36px;
+    padding: 0 8px;
+    font-size: 0.92rem;
   }
 
   .month-jump,
@@ -848,26 +803,29 @@ textarea::placeholder {
     justify-content: space-between;
   }
 
-  .brand-block {
-    align-items: flex-start;
-  }
-
-  .brand-mark {
-    width: 44px;
-    height: 44px;
-  }
-
   .month-controls {
     width: 100%;
+    padding: 4px;
   }
 
   .today-button {
     flex: 1;
+    min-height: 38px;
+  }
+
+  .icon-button {
+    width: 40px;
+    min-height: 38px;
   }
 
   .weekday-row {
     gap: 4px;
+    margin-bottom: 4px;
     font-size: 0.78rem;
+  }
+
+  .weekday-row span {
+    padding: 6px 0;
   }
 
   .calendar-grid {
@@ -875,12 +833,30 @@ textarea::placeholder {
   }
 
   .day-cell {
-    min-height: 84px;
-    padding: 7px;
+    min-height: 72px;
+    padding: 6px;
+  }
+
+  .day-number {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+  }
+
+  .event-badge {
+    min-width: 20px;
+    padding: 2px 5px;
+    font-size: 0.68rem;
   }
 
   .day-preview {
-    display: none;
+    display: grid;
+    gap: 3px;
+    font-size: 0.68rem;
+  }
+
+  .preview-line {
+    padding: 2px 4px;
+    border-radius: 5px;
   }
 
   .two-column {
@@ -898,13 +874,6 @@ textarea::placeholder {
     bottom: 12px;
   }
 
-  .time-popover {
-    left: 12px !important;
-    right: 12px;
-    top: auto !important;
-    bottom: 12px;
-    width: auto !important;
-  }
 }
 
   </style>
@@ -964,8 +933,11 @@ textarea::placeholder {
           </div>
         </header>
 
-        <section class="form-panel" aria-label="新增或編輯活動">
-          <h3 id="formTitle">新增活動</h3>
+        <section class="form-panel" id="formPanel" aria-label="新增或編輯活動" hidden>
+          <div class="section-title">
+            <h3 id="formTitle">新增活動</h3>
+            <button class="secondary-button compact" type="button" id="backToEventsButton">返回活動</button>
+          </div>
           <p class="form-date" id="formDateText"></p>
           <form id="eventForm">
             <input type="hidden" id="editingId">
@@ -976,11 +948,11 @@ textarea::placeholder {
             <div class="two-column">
               <label>
                 開始時間
-                <input id="eventStartTime" class="time-input" type="text" inputmode="none" readonly placeholder="--:--">
+                <input id="eventStartTime" class="time-input" type="text" inputmode="numeric" maxlength="5" placeholder="例如 0930">
               </label>
               <label>
                 結束時間
-                <input id="eventEndTime" class="time-input" type="text" inputmode="none" readonly placeholder="--:--">
+                <input id="eventEndTime" class="time-input" type="text" inputmode="numeric" maxlength="5" placeholder="例如 1800">
               </label>
             </div>
             <label class="check-row">
@@ -998,7 +970,7 @@ textarea::placeholder {
           </form>
         </section>
 
-        <section class="events-section" aria-label="當日活動">
+        <section class="events-section" id="eventsPanel" aria-label="當日活動">
           <div class="section-title">
             <h3>當日活動</h3>
             <button class="secondary-button compact" type="button" id="exportButton">備份</button>
@@ -1008,31 +980,6 @@ textarea::placeholder {
       </div>
     </aside>
   </main>
-
-  <div class="time-popover" id="timePopover" hidden>
-    <div class="time-popover-head">
-      <strong id="timePopoverTitle">選擇時間</strong>
-      <button class="time-close" type="button" id="closeTimePopover" aria-label="關閉時間選擇器">×</button>
-    </div>
-    <div class="time-display" id="timeDisplay">--:--</div>
-    <div class="time-columns">
-      <div>
-        <p>小時</p>
-        <div class="time-grid" id="hourGrid"></div>
-      </div>
-      <div>
-        <p>分鐘</p>
-        <div class="time-grid minute-grid" id="minuteGrid"></div>
-      </div>
-    </div>
-    <div class="time-popover-actions">
-      <button class="keyboard-toggle" type="button" id="keyboardToggle" aria-label="使用鍵盤輸入時間" title="使用鍵盤輸入時間">
-        <span aria-hidden="true">⌨</span>
-      </button>
-      <button class="secondary-button compact" type="button" id="clearTimeButton">清除</button>
-      <button class="primary-button compact" type="button" id="confirmTimeButton">完成</button>
-    </div>
-  </div>
 
   <template id="eventTemplate">
     <article class="event-card">
@@ -1061,6 +1008,8 @@ const selectedDateLabel = document.querySelector("#selectedDateLabel");
 const selectedCount = document.querySelector("#selectedCount");
 const jumpMonth = document.querySelector("#jumpMonth");
 const eventList = document.querySelector("#eventList");
+const formPanel = document.querySelector("#formPanel");
+const eventsPanel = document.querySelector("#eventsPanel");
 const eventForm = document.querySelector("#eventForm");
 const editingId = document.querySelector("#editingId");
 const eventTitle = document.querySelector("#eventTitle");
@@ -1072,17 +1021,9 @@ const formTitle = document.querySelector("#formTitle");
 const formDateText = document.querySelector("#formDateText");
 const saveButton = document.querySelector("#saveButton");
 const cancelEditButton = document.querySelector("#cancelEditButton");
+const backToEventsButton = document.querySelector("#backToEventsButton");
 const focusEventButton = document.querySelector("#focusEventButton");
 const closeDetailButton = document.querySelector("#closeDetailButton");
-const keyboardToggle = document.querySelector("#keyboardToggle");
-const timePopover = document.querySelector("#timePopover");
-const timePopoverTitle = document.querySelector("#timePopoverTitle");
-const timeDisplay = document.querySelector("#timeDisplay");
-const hourGrid = document.querySelector("#hourGrid");
-const minuteGrid = document.querySelector("#minuteGrid");
-const closeTimePopoverButton = document.querySelector("#closeTimePopover");
-const clearTimeButton = document.querySelector("#clearTimeButton");
-const confirmTimeButton = document.querySelector("#confirmTimeButton");
 const toast = document.querySelector("#toast");
 const eventTemplate = document.querySelector("#eventTemplate");
 
@@ -1090,9 +1031,6 @@ const today = new Date();
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = toDateKey(today);
 let events = loadEvents();
-let activeTimeInput = null;
-let pendingHour = "";
-let pendingMinute = "";
 
 document.querySelector("#prevMonth").addEventListener("click", () => changeMonth(-1));
 document.querySelector("#nextMonth").addEventListener("click", () => changeMonth(1));
@@ -1104,22 +1042,13 @@ closeDetailButton.addEventListener("click", closeDetail);
 detailPanel.addEventListener("click", handleOverlayClick);
 eventAllDay.addEventListener("change", syncAllDayFields);
 [eventStartTime, eventEndTime].forEach((input) => {
-  input.addEventListener("click", () => openTimePopover(input));
-  input.addEventListener("focus", () => {
-    if (input.readOnly) openTimePopover(input);
-  });
-  input.addEventListener("blur", normalizeTypedTime);
+  input.addEventListener("blur", () => normalizeTimeField(input));
 });
-keyboardToggle.addEventListener("click", enableKeyboardForActiveTime);
-closeTimePopoverButton.addEventListener("click", closeTimePopover);
-clearTimeButton.addEventListener("click", clearActiveTime);
-confirmTimeButton.addEventListener("click", confirmTimeSelection);
-document.addEventListener("click", handleDocumentClick);
 cancelEditButton.addEventListener("click", resetForm);
+backToEventsButton.addEventListener("click", showEventsView);
 eventForm.addEventListener("submit", saveEvent);
 document.addEventListener("keydown", handleShortcuts);
 
-buildTimePicker();
 render();
 
 function loadEvents() {
@@ -1204,7 +1133,8 @@ function renderCalendar() {
     dayEvents.slice(0, 3).forEach((event) => {
       const line = document.createElement("span");
       line.className = "preview-line";
-      line.textContent = `${formatEventTime(event)} ${event.title}`;
+      line.textContent = event.title;
+      line.title = `${formatEventTime(event)} ${event.title}`;
       preview.append(line);
     });
 
@@ -1216,6 +1146,7 @@ function renderCalendar() {
       resetForm();
       render();
       openDetail();
+      showEventsView();
     });
 
     calendarGrid.append(button);
@@ -1277,6 +1208,7 @@ function saveEvent(event) {
   persistEvents();
   resetForm();
   render();
+  showEventsView();
   showToast(wasEditing ? "活動已更新" : "活動已儲存");
 }
 
@@ -1290,6 +1222,7 @@ function editEvent(id) {
   eventAllDay.checked = Boolean(event.allDay);
   eventNotes.value = event.notes;
   syncAllDayFields();
+  showFormView();
   formTitle.textContent = "編輯活動";
   saveButton.textContent = "更新活動";
   cancelEditButton.hidden = false;
@@ -1312,8 +1245,6 @@ function deleteEvent(id) {
 function resetForm() {
   editingId.value = "";
   eventForm.reset();
-  resetTimeField(eventStartTime);
-  resetTimeField(eventEndTime);
   eventAllDay.checked = false;
   syncAllDayFields();
   formTitle.textContent = "新增活動";
@@ -1335,134 +1266,38 @@ function exportBackup() {
 function focusNewEvent() {
   openDetail();
   resetForm();
+  showFormView();
   eventTitle.focus();
+}
+
+function showEventsView() {
+  formPanel.hidden = true;
+  eventsPanel.hidden = false;
+}
+
+function showFormView() {
+  formPanel.hidden = false;
+  eventsPanel.hidden = true;
 }
 
 function syncAllDayFields() {
   const disabled = eventAllDay.checked;
   eventStartTime.disabled = disabled;
   eventEndTime.disabled = disabled;
-  closeTimePopover();
   if (disabled) {
     eventStartTime.value = "";
     eventEndTime.value = "";
   }
 }
 
-function buildTimePicker() {
-  for (let hour = 0; hour < 24; hour += 1) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "time-option";
-    button.textContent = pad(hour);
-    button.addEventListener("click", () => {
-      pendingHour = pad(hour);
-      updateTimeSelection();
-    });
-    hourGrid.append(button);
-  }
-
-  for (let minute = 0; minute < 60; minute += 5) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "time-option";
-    button.textContent = pad(minute);
-    button.addEventListener("click", () => {
-      pendingMinute = pad(minute);
-      updateTimeSelection();
-    });
-    minuteGrid.append(button);
-  }
-}
-
-function openTimePopover(input) {
-  if (input.disabled) return;
-  activeTimeInput = input;
-  const [hour = "", minute = ""] = input.value.split(":");
-  pendingHour = hour;
-  pendingMinute = minute;
-  timePopoverTitle.textContent = input === eventStartTime ? "開始時間" : "結束時間";
-  updateTimeSelection();
-  positionTimePopover(input);
-  timePopover.hidden = false;
-}
-
-function positionTimePopover(input) {
-  const rect = input.getBoundingClientRect();
-  const width = Math.min(320, window.innerWidth - 24);
-  const left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12));
-  const top = Math.min(rect.bottom + 8, window.innerHeight - 360);
-  timePopover.style.left = `${left}px`;
-  timePopover.style.top = `${Math.max(12, top)}px`;
-  timePopover.style.width = `${width}px`;
-}
-
-function updateTimeSelection() {
-  timeDisplay.textContent = pendingHour && pendingMinute ? `${pendingHour}:${pendingMinute}` : "--:--";
-  hourGrid.querySelectorAll(".time-option").forEach((button) => {
-    button.classList.toggle("is-selected", button.textContent === pendingHour);
-  });
-  minuteGrid.querySelectorAll(".time-option").forEach((button) => {
-    button.classList.toggle("is-selected", button.textContent === pendingMinute);
-  });
-}
-
-function confirmTimeSelection() {
-  if (!activeTimeInput) return;
-  if (pendingHour && pendingMinute) {
-    activeTimeInput.value = `${pendingHour}:${pendingMinute}`;
-    closeTimePopover();
-  } else {
-    showToast("請選擇小時和分鐘");
-  }
-}
-
-function clearActiveTime() {
-  if (!activeTimeInput) return;
-  activeTimeInput.value = "";
-  pendingHour = "";
-  pendingMinute = "";
-  updateTimeSelection();
-}
-
-function closeTimePopover() {
-  timePopover.hidden = true;
-  activeTimeInput = null;
-}
-
-function enableKeyboardForActiveTime() {
-  if (!activeTimeInput) return;
-  const input = activeTimeInput;
-  closeTimePopover();
-  input.readOnly = false;
-  input.inputMode = "numeric";
-  input.placeholder = "例如 0930";
-  input.maxLength = 5;
-  input.focus();
-  showToast("請輸入 0930 或 09:30");
-}
-
-function normalizeTypedTime(event) {
-  if (event.target.readOnly || event.target.disabled) return;
-  normalizeTimeField(event.target);
-}
-
 function normalizeTimeField(input) {
-  if (input.readOnly || input.disabled) return;
+  if (input.disabled) return;
   const original = input.value.trim();
   const normalized = parseTimeText(input.value);
   input.value = normalized;
-  resetTimeField(input);
   if (original && !normalized) {
     showToast("時間格式請輸入 0930 或 09:30");
   }
-}
-
-function resetTimeField(input) {
-  input.readOnly = true;
-  input.inputMode = "none";
-  input.placeholder = "--:--";
-  input.removeAttribute("maxlength");
 }
 
 function parseTimeText(value) {
@@ -1483,10 +1318,6 @@ function handleShortcuts(event) {
     showToast("已取消編輯");
     return;
   }
-  if (event.key === "Escape" && !timePopover.hidden) {
-    closeTimePopover();
-    return;
-  }
   if (event.key === "Escape" && detailPanel.classList.contains("is-open")) {
     closeDetail();
   }
@@ -1496,28 +1327,20 @@ function openDetail() {
   detailPanel.classList.add("is-open");
   detailPanel.setAttribute("aria-hidden", "false");
   document.body.classList.add("modal-open");
+  showEventsView();
 }
 
 function closeDetail() {
   detailPanel.classList.remove("is-open");
   detailPanel.setAttribute("aria-hidden", "true");
   document.body.classList.remove("modal-open");
-  closeTimePopover();
   resetForm();
+  showEventsView();
 }
 
 function handleOverlayClick(event) {
   if (event.target === detailPanel) {
     closeDetail();
-  }
-}
-
-function handleDocumentClick(event) {
-  if (timePopover.hidden) return;
-  const clickedPopover = timePopover.contains(event.target);
-  const clickedInput = event.target === eventStartTime || event.target === eventEndTime;
-  if (!clickedPopover && !clickedInput) {
-    closeTimePopover();
   }
 }
 
