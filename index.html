@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>自用日曆</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="calendar-panel" aria-label="月曆">
+      <header class="topbar">
+        <div class="brand-block">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <div>
+          <p class="eyebrow">Personal Calendar</p>
+          <h1>自用日曆</h1>
+          </div>
+        </div>
+        <div class="month-controls" aria-label="月份控制">
+          <button class="icon-button" id="prevMonth" type="button" aria-label="上一個月" title="上一個月">‹</button>
+          <button class="today-button" id="todayButton" type="button">今天</button>
+          <button class="icon-button" id="nextMonth" type="button" aria-label="下一個月" title="下一個月">›</button>
+        </div>
+      </header>
+
+      <div class="month-title">
+        <h2 id="monthLabel"></h2>
+        <p id="monthSummary"></p>
+      </div>
+
+      <div class="weekday-row" aria-hidden="true">
+        <span>日</span>
+        <span>一</span>
+        <span>二</span>
+        <span>三</span>
+        <span>四</span>
+        <span>五</span>
+        <span>六</span>
+      </div>
+      <div class="calendar-grid" id="calendarGrid"></div>
+    </section>
+
+    <aside class="detail-panel" aria-label="日期活動詳細頁">
+      <header class="detail-header">
+        <div class="detail-title-block">
+          <p class="eyebrow">Selected Date</p>
+          <h2 id="selectedDateLabel"></h2>
+        </div>
+        <span class="count-pill" id="selectedCount">0 筆</span>
+      </header>
+
+      <section class="form-panel" aria-label="新增或編輯活動">
+        <h3 id="formTitle">新增活動</h3>
+        <form id="eventForm">
+          <input type="hidden" id="editingId">
+          <label>
+            活動名稱
+            <input id="eventTitle" type="text" maxlength="80" required placeholder="例如：看牙醫">
+          </label>
+          <div class="two-column">
+            <label>
+              開始時間
+              <input id="eventTime" type="time">
+            </label>
+            <label>
+              類型
+              <select id="eventCategory">
+                <option value="生活">生活</option>
+                <option value="工作">工作</option>
+                <option value="學習">學習</option>
+                <option value="重要">重要</option>
+                <option value="其他">其他</option>
+              </select>
+            </label>
+          </div>
+          <label>
+            詳細內容
+            <textarea id="eventNotes" rows="5" placeholder="地點、備註、要準備的東西..."></textarea>
+          </label>
+          <div class="form-actions">
+            <button class="primary-button" type="submit" id="saveButton">儲存活動</button>
+            <button class="secondary-button" type="button" id="cancelEditButton" hidden>取消編輯</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="events-section" aria-label="當日活動">
+        <div class="section-title">
+          <h3>當日活動</h3>
+          <button class="secondary-button compact" type="button" id="exportButton">備份</button>
+        </div>
+        <div class="event-list" id="eventList"></div>
+      </section>
+    </aside>
+  </main>
+
+  <template id="eventTemplate">
+    <article class="event-card">
+      <div class="event-color"></div>
+      <div class="event-content">
+        <div class="event-meta"></div>
+        <h4></h4>
+        <p></p>
+        <div class="event-actions">
+          <button class="secondary-button compact edit-event" type="button">編輯</button>
+          <button class="danger-button compact delete-event" type="button">刪除</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
