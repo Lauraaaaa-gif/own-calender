@@ -650,6 +650,20 @@ textarea::placeholder {
   box-shadow: none;
 }
 
+.repeat-panel {
+  display: grid;
+  gap: 12px;
+  padding: 13px;
+  background: rgba(255, 255, 255, 0.54);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.repeat-panel[hidden],
+.custom-repeat-field[hidden] {
+  display: none;
+}
+
 .color-field {
   display: grid;
   gap: 9px;
@@ -1073,6 +1087,32 @@ textarea::placeholder {
               <input id="eventAllDay" type="checkbox">
               <span>整天活動</span>
             </label>
+            <label>
+              重複
+              <select id="eventRepeat">
+                <option value="none" selected>永不</option>
+                <option value="daily">每天</option>
+                <option value="weekly">每週</option>
+                <option value="monthly">每月</option>
+                <option value="yearly">每年</option>
+                <option value="custom">自訂</option>
+              </select>
+            </label>
+            <div class="repeat-panel" id="repeatPanel" hidden>
+              <label class="custom-repeat-field" id="customRepeatField" hidden>
+                自訂頻率
+                <select id="eventCustomRepeat">
+                  <option value="daily">每天</option>
+                  <option value="weekly">每週</option>
+                  <option value="monthly">每月</option>
+                  <option value="yearly">每年</option>
+                </select>
+              </label>
+              <label>
+                重複結束日期
+                <input id="eventRepeatEndDate" type="date">
+              </label>
+            </div>
             <fieldset class="color-field">
               <legend>標籤顏色</legend>
               <div class="color-options" aria-label="標籤顏色">
@@ -1175,6 +1215,11 @@ const eventTitle = document.querySelector("#eventTitle");
 const eventStartTime = document.querySelector("#eventStartTime");
 const eventEndTime = document.querySelector("#eventEndTime");
 const eventAllDay = document.querySelector("#eventAllDay");
+const eventRepeat = document.querySelector("#eventRepeat");
+const repeatPanel = document.querySelector("#repeatPanel");
+const customRepeatField = document.querySelector("#customRepeatField");
+const eventCustomRepeat = document.querySelector("#eventCustomRepeat");
+const eventRepeatEndDate = document.querySelector("#eventRepeatEndDate");
 const eventNotes = document.querySelector("#eventNotes");
 const eventColorInputs = [...document.querySelectorAll('input[name="eventColor"]')];
 const formTitle = document.querySelector("#formTitle");
@@ -1199,6 +1244,8 @@ if (provider) {
 }
 const DEFAULT_EVENT_COLOR = "lavender";
 const EVENT_COLOR_VALUES = ["lavender", "blue", "mint", "amber", "rose"];
+const REPEAT_TYPES = ["none", "daily", "weekly", "monthly", "yearly", "custom"];
+const REPEAT_FREQUENCIES = ["daily", "weekly", "monthly", "yearly"];
 
 const today = new Date();
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -1218,6 +1265,7 @@ focusEventButton.addEventListener("click", focusNewEvent);
 closeDetailButton.addEventListener("click", closeDetail);
 detailPanel.addEventListener("click", handleOverlayClick);
 eventAllDay.addEventListener("change", syncAllDayFields);
+eventRepeat.addEventListener("change", syncRecurrenceFields);
 [eventStartTime, eventEndTime].forEach((input) => {
   input.addEventListener("blur", () => normalizeTimeField(input));
 });
@@ -1401,7 +1449,7 @@ function render() {
 function renderMonthHeader() {
   const year = visibleDate.getFullYear();
   const month = visibleDate.getMonth() + 1;
-  const monthEvents = events.filter((event) => event.date.startsWith(`${year}-${pad(month)}-`));
+  const monthEvents = getEventsForMonth(year, month);
   monthLabel.textContent = `${year} 年 ${month} 月`;
   monthSummary.textContent = `${monthEvents.length} 筆活動`;
   jumpMonth.value = `${year}-${pad(month)}`;
@@ -1483,7 +1531,7 @@ function renderDetails() {
   dayEvents.forEach((event) => {
     const node = eventTemplate.content.firstElementChild.cloneNode(true);
     node.querySelector(".event-color").classList.add(getEventColorClass(event));
-    node.querySelector(".event-meta").textContent = formatEventTime(event);
+    node.querySelector(".event-meta").textContent = formatEventMeta(event);
     node.querySelector("h4").textContent = event.title;
     node.querySelector("p").textContent = event.notes || "沒有填寫詳細內容。";
     const actions = node.querySelector(".event-actions");
@@ -1507,16 +1555,20 @@ async function saveEvent(event) {
   normalizeTimeField(eventEndTime);
   const title = eventTitle.value.trim();
   if (!title) return;
+  const recurrence = getSelectedRecurrence();
+  if (!recurrence) return;
+  const originalEvent = editingId.value ? events.find((item) => item.id === editingId.value) : null;
 
   const payload = {
     id: editingId.value || createId(),
-    date: selectedDate,
+    date: originalEvent?.date || selectedDate,
     title,
     startTime: eventAllDay.checked ? "" : eventStartTime.value,
     endTime: eventAllDay.checked ? "" : eventEndTime.value,
     allDay: eventAllDay.checked,
     notes: eventNotes.value.trim(),
     color: getSelectedEventColor(),
+    recurrence,
     updatedAt: new Date().toISOString(),
   };
 
@@ -1540,6 +1592,7 @@ function editEvent(id) {
   eventStartTime.value = event.startTime || event.time || "";
   eventEndTime.value = event.endTime || "";
   eventAllDay.checked = Boolean(event.allDay);
+  setSelectedRecurrence(event.recurrence);
   eventNotes.value = event.notes;
   setSelectedEventColor(event.color);
   syncAllDayFields();
@@ -1589,8 +1642,10 @@ function resetForm() {
   editingId.value = "";
   eventForm.reset();
   eventAllDay.checked = false;
+  setSelectedRecurrence();
   setSelectedEventColor(DEFAULT_EVENT_COLOR);
   syncAllDayFields();
+  syncRecurrenceFields();
   formTitle.textContent = "新增活動";
   saveButton.textContent = "儲存活動";
   cancelEditButton.hidden = true;
@@ -1638,6 +1693,19 @@ function syncAllDayFields() {
   }
 }
 
+function syncRecurrenceFields() {
+  const repeats = eventRepeat.value !== "none";
+  repeatPanel.hidden = !repeats;
+  customRepeatField.hidden = eventRepeat.value !== "custom";
+  eventCustomRepeat.disabled = eventRepeat.value !== "custom";
+  eventRepeatEndDate.disabled = !repeats;
+  eventRepeatEndDate.required = repeats;
+  eventRepeatEndDate.min = selectedDate;
+  if (!repeats) {
+    eventRepeatEndDate.value = "";
+  }
+}
+
 function normalizeTimeField(input) {
   if (input.disabled) return;
   const original = input.value.trim();
@@ -1678,6 +1746,39 @@ function setSelectedEventColor(value) {
 
 function getEventColorClass(event) {
   return `event-tone-${normalizeEventColor(event?.color)}`;
+}
+
+function getSelectedRecurrence() {
+  const type = REPEAT_TYPES.includes(eventRepeat.value) ? eventRepeat.value : "none";
+  if (type === "none") {
+    return { type: "none", frequency: "", endDate: "" };
+  }
+  const frequency = type === "custom" ? eventCustomRepeat.value : type;
+  const endDate = eventRepeatEndDate.value;
+  if (!REPEAT_FREQUENCIES.includes(frequency)) {
+    showToast("請選擇重複頻率");
+    return null;
+  }
+  if (!endDate) {
+    showToast("請選擇重複結束日期");
+    eventRepeatEndDate.focus();
+    return null;
+  }
+  if (endDate < selectedDate) {
+    showToast("結束日期不能早於活動日期");
+    eventRepeatEndDate.focus();
+    return null;
+  }
+  return { type, frequency, endDate };
+}
+
+function setSelectedRecurrence(recurrence = {}) {
+  const type = REPEAT_TYPES.includes(recurrence.type) ? recurrence.type : "none";
+  const frequency = REPEAT_FREQUENCIES.includes(recurrence.frequency) ? recurrence.frequency : "daily";
+  eventRepeat.value = type;
+  eventCustomRepeat.value = frequency;
+  eventRepeatEndDate.value = recurrence.endDate || "";
+  syncRecurrenceFields();
 }
 
 function handleShortcuts(event) {
@@ -1731,12 +1832,54 @@ function createId() {
 
 function getEventsForDate(dateKey) {
   return events
-    .filter((event) => event.date === dateKey)
+    .filter((event) => occursOnDate(event, dateKey))
+    .map((event) => ({
+      ...event,
+      occurrenceDate: dateKey,
+      isRecurringOccurrence: event.date !== dateKey,
+    }))
     .sort((a, b) => {
       const aTime = a.allDay ? "00:00" : a.startTime || a.time || "99:99";
       const bTime = b.allDay ? "00:00" : b.startTime || b.time || "99:99";
       return aTime.localeCompare(bTime);
     });
+}
+
+function getEventsForMonth(year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const monthEvents = [];
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    monthEvents.push(...getEventsForDate(`${year}-${pad(month)}-${pad(day)}`));
+  }
+  return monthEvents;
+}
+
+function occursOnDate(event, dateKey) {
+  if (event.date === dateKey) return true;
+  const recurrence = event.recurrence || {};
+  const frequency = recurrence.type === "custom" ? recurrence.frequency : recurrence.type;
+  if (!REPEAT_FREQUENCIES.includes(frequency)) return false;
+  if (!event.date || dateKey < event.date) return false;
+  if (recurrence.endDate && dateKey > recurrence.endDate) return false;
+
+  const startDate = parseDateKey(event.date);
+  const targetDate = parseDateKey(dateKey);
+  if (!startDate || !targetDate) return false;
+
+  if (frequency === "daily") return true;
+  if (frequency === "weekly") return startDate.getDay() === targetDate.getDay();
+  if (frequency === "monthly") return startDate.getDate() === targetDate.getDate();
+  if (frequency === "yearly") {
+    return startDate.getMonth() === targetDate.getMonth()
+      && startDate.getDate() === targetDate.getDate();
+  }
+  return false;
+}
+
+function parseDateKey(dateKey) {
+  const [year, month, day] = String(dateKey).split("-").map(Number);
+  if (!year || !month || !day) return null;
+  return new Date(year, month - 1, day);
 }
 
 function toDateKey(date) {
@@ -1770,6 +1913,25 @@ function formatEventTime(event) {
   if (start) return start;
   if (end) return `到 ${end}`;
   return "未設定時間";
+}
+
+function formatEventMeta(event) {
+  const repeatText = formatRecurrenceLabel(event);
+  return repeatText ? `${formatEventTime(event)} · ${repeatText}` : formatEventTime(event);
+}
+
+function formatRecurrenceLabel(event) {
+  const recurrence = event.recurrence || {};
+  const frequency = recurrence.type === "custom" ? recurrence.frequency : recurrence.type;
+  if (!REPEAT_FREQUENCIES.includes(frequency)) return "";
+  const labels = {
+    daily: "每天重複",
+    weekly: "每週重複",
+    monthly: "每月重複",
+    yearly: "每年重複",
+  };
+  const endText = recurrence.endDate ? `，至 ${formatShortDate(recurrence.endDate)}` : "";
+  return `${labels[frequency]}${endText}`;
 }
 
   </script>
