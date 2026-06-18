@@ -143,28 +143,6 @@ body.modal-open {
   overflow-y: auto;
 }
 
-.keyboard-toggle {
-  position: sticky;
-  bottom: 0;
-  left: 0;
-  display: grid;
-  width: 44px;
-  min-height: 44px;
-  margin-top: -44px;
-  place-items: center;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.84);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-sm);
-  font-size: 1.1rem;
-}
-
-.keyboard-toggle.is-active {
-  color: #fff;
-  background: linear-gradient(180deg, #2d7056, var(--accent-strong));
-}
-
 .calendar-panel > *,
 .detail-sheet > * {
   position: relative;
@@ -645,6 +623,99 @@ textarea::placeholder {
   box-shadow: none;
 }
 
+.time-popover {
+  position: fixed;
+  z-index: 30;
+  padding: 12px;
+  color: var(--ink);
+  background: rgba(255, 254, 250, 0.96);
+  border: 1px solid rgba(21, 24, 22, 0.16);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-xl);
+  backdrop-filter: blur(18px);
+}
+
+.time-popover[hidden] {
+  display: none;
+}
+
+.time-popover-head,
+.time-popover-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.time-close,
+.keyboard-toggle {
+  display: grid;
+  width: 36px;
+  min-height: 36px;
+  place-items: center;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  font-weight: 900;
+}
+
+.keyboard-toggle {
+  margin-right: auto;
+  font-size: 1rem;
+}
+
+.time-display {
+  margin: 10px 0;
+  padding: 10px;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  font-size: 1.3rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.time-columns {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.time-columns p {
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.time-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+  max-height: 168px;
+  overflow-y: auto;
+}
+
+.minute-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.time-option {
+  min-height: 34px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.76);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font-weight: 900;
+}
+
+.time-option.is-selected {
+  color: #fff;
+  background: linear-gradient(180deg, #2d7056, var(--accent-strong));
+}
+
 .event-list {
   display: grid;
   gap: 12px;
@@ -827,10 +898,12 @@ textarea::placeholder {
     bottom: 12px;
   }
 
-  .keyboard-toggle {
-    position: sticky;
-    bottom: 8px;
-    margin-top: -36px;
+  .time-popover {
+    left: 12px !important;
+    right: 12px;
+    top: auto !important;
+    bottom: 12px;
+    width: auto !important;
   }
 }
 
@@ -903,11 +976,11 @@ textarea::placeholder {
             <div class="two-column">
               <label>
                 開始時間
-                <input id="eventStartTime" type="time">
+                <input id="eventStartTime" class="time-input" type="text" inputmode="none" readonly placeholder="--:--">
               </label>
               <label>
                 結束時間
-                <input id="eventEndTime" type="time">
+                <input id="eventEndTime" class="time-input" type="text" inputmode="none" readonly placeholder="--:--">
               </label>
             </div>
             <label class="check-row">
@@ -932,12 +1005,34 @@ textarea::placeholder {
           </div>
           <div class="event-list" id="eventList"></div>
         </section>
-        <button class="keyboard-toggle" type="button" id="keyboardToggle" aria-pressed="false" aria-label="切換鍵盤輸入時間" title="切換鍵盤輸入時間">
-          <span aria-hidden="true">⌨</span>
-        </button>
       </div>
     </aside>
   </main>
+
+  <div class="time-popover" id="timePopover" hidden>
+    <div class="time-popover-head">
+      <strong id="timePopoverTitle">選擇時間</strong>
+      <button class="time-close" type="button" id="closeTimePopover" aria-label="關閉時間選擇器">×</button>
+    </div>
+    <div class="time-display" id="timeDisplay">--:--</div>
+    <div class="time-columns">
+      <div>
+        <p>小時</p>
+        <div class="time-grid" id="hourGrid"></div>
+      </div>
+      <div>
+        <p>分鐘</p>
+        <div class="time-grid minute-grid" id="minuteGrid"></div>
+      </div>
+    </div>
+    <div class="time-popover-actions">
+      <button class="keyboard-toggle" type="button" id="keyboardToggle" aria-label="使用鍵盤輸入時間" title="使用鍵盤輸入時間">
+        <span aria-hidden="true">⌨</span>
+      </button>
+      <button class="secondary-button compact" type="button" id="clearTimeButton">清除</button>
+      <button class="primary-button compact" type="button" id="confirmTimeButton">完成</button>
+    </div>
+  </div>
 
   <template id="eventTemplate">
     <article class="event-card">
@@ -980,6 +1075,14 @@ const cancelEditButton = document.querySelector("#cancelEditButton");
 const focusEventButton = document.querySelector("#focusEventButton");
 const closeDetailButton = document.querySelector("#closeDetailButton");
 const keyboardToggle = document.querySelector("#keyboardToggle");
+const timePopover = document.querySelector("#timePopover");
+const timePopoverTitle = document.querySelector("#timePopoverTitle");
+const timeDisplay = document.querySelector("#timeDisplay");
+const hourGrid = document.querySelector("#hourGrid");
+const minuteGrid = document.querySelector("#minuteGrid");
+const closeTimePopoverButton = document.querySelector("#closeTimePopover");
+const clearTimeButton = document.querySelector("#clearTimeButton");
+const confirmTimeButton = document.querySelector("#confirmTimeButton");
 const toast = document.querySelector("#toast");
 const eventTemplate = document.querySelector("#eventTemplate");
 
@@ -987,7 +1090,9 @@ const today = new Date();
 let visibleDate = new Date(today.getFullYear(), today.getMonth(), 1);
 let selectedDate = toDateKey(today);
 let events = loadEvents();
-let keyboardTimeMode = false;
+let activeTimeInput = null;
+let pendingHour = "";
+let pendingMinute = "";
 
 document.querySelector("#prevMonth").addEventListener("click", () => changeMonth(-1));
 document.querySelector("#nextMonth").addEventListener("click", () => changeMonth(1));
@@ -998,14 +1103,23 @@ focusEventButton.addEventListener("click", focusNewEvent);
 closeDetailButton.addEventListener("click", closeDetail);
 detailPanel.addEventListener("click", handleOverlayClick);
 eventAllDay.addEventListener("change", syncAllDayFields);
-keyboardToggle.addEventListener("click", toggleKeyboardTimeMode);
 [eventStartTime, eventEndTime].forEach((input) => {
-  input.addEventListener("blur", normalizeTimeInput);
+  input.addEventListener("click", () => openTimePopover(input));
+  input.addEventListener("focus", () => {
+    if (input.readOnly) openTimePopover(input);
+  });
+  input.addEventListener("blur", normalizeTypedTime);
 });
+keyboardToggle.addEventListener("click", enableKeyboardForActiveTime);
+closeTimePopoverButton.addEventListener("click", closeTimePopover);
+clearTimeButton.addEventListener("click", clearActiveTime);
+confirmTimeButton.addEventListener("click", confirmTimeSelection);
+document.addEventListener("click", handleDocumentClick);
 cancelEditButton.addEventListener("click", resetForm);
 eventForm.addEventListener("submit", saveEvent);
 document.addEventListener("keydown", handleShortcuts);
 
+buildTimePicker();
 render();
 
 function loadEvents() {
@@ -1137,6 +1251,8 @@ function renderDetails() {
 
 function saveEvent(event) {
   event.preventDefault();
+  normalizeTimeField(eventStartTime);
+  normalizeTimeField(eventEndTime);
   const title = eventTitle.value.trim();
   if (!title) return;
 
@@ -1196,6 +1312,8 @@ function deleteEvent(id) {
 function resetForm() {
   editingId.value = "";
   eventForm.reset();
+  resetTimeField(eventStartTime);
+  resetTimeField(eventEndTime);
   eventAllDay.checked = false;
   syncAllDayFields();
   formTitle.textContent = "新增活動";
@@ -1224,41 +1342,127 @@ function syncAllDayFields() {
   const disabled = eventAllDay.checked;
   eventStartTime.disabled = disabled;
   eventEndTime.disabled = disabled;
+  closeTimePopover();
   if (disabled) {
     eventStartTime.value = "";
     eventEndTime.value = "";
   }
 }
 
-function toggleKeyboardTimeMode() {
-  keyboardTimeMode = !keyboardTimeMode;
-  applyTimeInputMode();
-  showToast(keyboardTimeMode ? "已切換成鍵盤輸入時間" : "已切回時間選擇器");
+function buildTimePicker() {
+  for (let hour = 0; hour < 24; hour += 1) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "time-option";
+    button.textContent = pad(hour);
+    button.addEventListener("click", () => {
+      pendingHour = pad(hour);
+      updateTimeSelection();
+    });
+    hourGrid.append(button);
+  }
+
+  for (let minute = 0; minute < 60; minute += 5) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "time-option";
+    button.textContent = pad(minute);
+    button.addEventListener("click", () => {
+      pendingMinute = pad(minute);
+      updateTimeSelection();
+    });
+    minuteGrid.append(button);
+  }
 }
 
-function applyTimeInputMode() {
-  [eventStartTime, eventEndTime].forEach((input) => {
-    input.type = keyboardTimeMode ? "text" : "time";
-    input.inputMode = keyboardTimeMode ? "numeric" : "";
-    input.placeholder = keyboardTimeMode ? "例如 0930" : "";
-    if (keyboardTimeMode) {
-      input.maxLength = 5;
-    } else {
-      input.removeAttribute("maxlength");
-    }
+function openTimePopover(input) {
+  if (input.disabled) return;
+  activeTimeInput = input;
+  const [hour = "", minute = ""] = input.value.split(":");
+  pendingHour = hour;
+  pendingMinute = minute;
+  timePopoverTitle.textContent = input === eventStartTime ? "開始時間" : "結束時間";
+  updateTimeSelection();
+  positionTimePopover(input);
+  timePopover.hidden = false;
+}
+
+function positionTimePopover(input) {
+  const rect = input.getBoundingClientRect();
+  const width = Math.min(320, window.innerWidth - 24);
+  const left = Math.max(12, Math.min(rect.left, window.innerWidth - width - 12));
+  const top = Math.min(rect.bottom + 8, window.innerHeight - 360);
+  timePopover.style.left = `${left}px`;
+  timePopover.style.top = `${Math.max(12, top)}px`;
+  timePopover.style.width = `${width}px`;
+}
+
+function updateTimeSelection() {
+  timeDisplay.textContent = pendingHour && pendingMinute ? `${pendingHour}:${pendingMinute}` : "--:--";
+  hourGrid.querySelectorAll(".time-option").forEach((button) => {
+    button.classList.toggle("is-selected", button.textContent === pendingHour);
   });
-  keyboardToggle.classList.toggle("is-active", keyboardTimeMode);
-  keyboardToggle.setAttribute("aria-pressed", String(keyboardTimeMode));
+  minuteGrid.querySelectorAll(".time-option").forEach((button) => {
+    button.classList.toggle("is-selected", button.textContent === pendingMinute);
+  });
 }
 
-function normalizeTimeInput(event) {
-  if (!keyboardTimeMode || event.target.disabled) return;
-  const original = event.target.value.trim();
-  const normalized = parseTimeText(event.target.value);
-  event.target.value = normalized;
+function confirmTimeSelection() {
+  if (!activeTimeInput) return;
+  if (pendingHour && pendingMinute) {
+    activeTimeInput.value = `${pendingHour}:${pendingMinute}`;
+    closeTimePopover();
+  } else {
+    showToast("請選擇小時和分鐘");
+  }
+}
+
+function clearActiveTime() {
+  if (!activeTimeInput) return;
+  activeTimeInput.value = "";
+  pendingHour = "";
+  pendingMinute = "";
+  updateTimeSelection();
+}
+
+function closeTimePopover() {
+  timePopover.hidden = true;
+  activeTimeInput = null;
+}
+
+function enableKeyboardForActiveTime() {
+  if (!activeTimeInput) return;
+  const input = activeTimeInput;
+  closeTimePopover();
+  input.readOnly = false;
+  input.inputMode = "numeric";
+  input.placeholder = "例如 0930";
+  input.maxLength = 5;
+  input.focus();
+  showToast("請輸入 0930 或 09:30");
+}
+
+function normalizeTypedTime(event) {
+  if (event.target.readOnly || event.target.disabled) return;
+  normalizeTimeField(event.target);
+}
+
+function normalizeTimeField(input) {
+  if (input.readOnly || input.disabled) return;
+  const original = input.value.trim();
+  const normalized = parseTimeText(input.value);
+  input.value = normalized;
+  resetTimeField(input);
   if (original && !normalized) {
     showToast("時間格式請輸入 0930 或 09:30");
   }
+}
+
+function resetTimeField(input) {
+  input.readOnly = true;
+  input.inputMode = "none";
+  input.placeholder = "--:--";
+  input.removeAttribute("maxlength");
 }
 
 function parseTimeText(value) {
@@ -1279,6 +1483,10 @@ function handleShortcuts(event) {
     showToast("已取消編輯");
     return;
   }
+  if (event.key === "Escape" && !timePopover.hidden) {
+    closeTimePopover();
+    return;
+  }
   if (event.key === "Escape" && detailPanel.classList.contains("is-open")) {
     closeDetail();
   }
@@ -1294,12 +1502,22 @@ function closeDetail() {
   detailPanel.classList.remove("is-open");
   detailPanel.setAttribute("aria-hidden", "true");
   document.body.classList.remove("modal-open");
+  closeTimePopover();
   resetForm();
 }
 
 function handleOverlayClick(event) {
   if (event.target === detailPanel) {
     closeDetail();
+  }
+}
+
+function handleDocumentClick(event) {
+  if (timePopover.hidden) return;
+  const clickedPopover = timePopover.contains(event.target);
+  const clickedInput = event.target === eventStartTime || event.target === eventEndTime;
+  if (!clickedPopover && !clickedInput) {
+    closeTimePopover();
   }
 }
 
