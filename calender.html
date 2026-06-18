@@ -1131,6 +1131,10 @@ function initCloud() {
     updateAuthUi();
   });
 
+  auth.getRedirectResult().catch((error) => {
+    showToast(getAuthErrorMessage(error));
+  });
+
   auth.onAuthStateChanged(async (user) => {
     currentUser = user;
     if (user) {
@@ -1164,11 +1168,49 @@ async function handleAuthClick() {
       await auth.signOut();
       showToast("已登出管理模式");
     } else {
+      if (shouldUseRedirectLogin()) {
+        await auth.signInWithRedirect(provider);
+        return;
+      }
       await auth.signInWithPopup(provider);
     }
-  } catch {
-    showToast("登入失敗，請稍後再試");
+  } catch (error) {
+    if (shouldRetryWithRedirect(error)) {
+      showToast("改用跳轉登入");
+      await auth.signInWithRedirect(provider);
+      return;
+    }
+    showToast(getAuthErrorMessage(error));
   }
+}
+
+function shouldUseRedirectLogin() {
+  return window.matchMedia("(max-width: 760px)").matches || "ontouchstart" in window;
+}
+
+function shouldRetryWithRedirect(error) {
+  return [
+    "auth/popup-blocked",
+    "auth/popup-closed-by-user",
+    "auth/cancelled-popup-request",
+    "auth/operation-not-supported-in-this-environment",
+  ].includes(error?.code);
+}
+
+function getAuthErrorMessage(error) {
+  if (error?.code === "auth/unauthorized-domain") {
+    return "請到 Firebase 加入 GitHub Pages 授權網域";
+  }
+  if (error?.code === "auth/popup-blocked") {
+    return "瀏覽器擋住登入視窗，請再按一次";
+  }
+  if (error?.code === "auth/popup-closed-by-user") {
+    return "登入視窗已關閉";
+  }
+  if (error?.code === "auth/operation-not-allowed") {
+    return "請先啟用 Google 登入";
+  }
+  return "登入失敗，請稍後再試";
 }
 
 function updateAuthUi() {
